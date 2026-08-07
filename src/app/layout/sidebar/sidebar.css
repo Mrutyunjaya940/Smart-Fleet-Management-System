@@ -1,0 +1,73 @@
+.sidebar{
+
+  width:260px;
+
+  height:100vh;
+
+  background:#1E293B;
+
+  color:white;
+
+  display:flex;
+
+  flex-direction:column;
+
+}
+
+.logo{
+
+  height:70px;
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+  border-bottom:1px solid rgba(255,255,255,.1);
+
+}
+
+.logo h2{
+
+  color:white;
+
+}
+
+.menu{
+
+  list-style:none;
+
+  margin:0;
+
+  padding:20px 0;
+
+}
+
+.menu li{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:15px;
+
+  padding:15px 25px;
+
+  cursor:pointer;
+
+  transition:.3s;
+
+}
+
+.menu li:hover{
+
+  background:#2563EB;
+
+}
+
+.icon{
+
+  font-size:20px;
+
+}

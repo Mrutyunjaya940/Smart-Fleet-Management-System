@@ -1,0 +1,40 @@
+<header class="header">
+
+  <div class="left-section">
+
+    <h2>{{ title }}</h2>
+
+  </div>
+
+  <div class="right-section">
+
+    <input
+      type="text"
+      placeholder="Search..."
+      class="search-box"
+    />
+
+    <button class="icon-btn">🔔</button>
+
+    <button class="icon-btn">🌙</button>
+
+    <button
+      mat-raised-button
+      color="warn"
+      (click)="logout()">
+      Logout
+    </button>
+
+    <div class="profile">
+
+      <div class="avatar">
+        A
+      </div>
+
+      <span>Admin</span>
+
+    </div>
+
+  </div>
+
+</header>
