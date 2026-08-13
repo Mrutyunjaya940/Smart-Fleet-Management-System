@@ -1,95 +1,100 @@
 <div class="login-container">
+  <!-- 3D Background Overlay -->
+  <div class="bg-overlay"></div>
 
-  <mat-card class="login-card">
-
-    <p>Please login to continue</p>
-
-    <form [formGroup]="loginForm" (ngSubmit)="login()">
-
-      <!-- Email -->
-
-      <mat-form-field appearance="outline" class="full-width">
-
-        <mat-label>Email Address</mat-label>
-
-        <input
-          matInput
-          type="email"
-          formControlName="email"
-          placeholder="Enter your email">
-
-        <mat-icon matSuffix>email</mat-icon>
-
-        <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
-          Email is required
-        </mat-error>
-
-        <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
-          Invalid email address
-        </mat-error>
-
-      </mat-form-field>
-
-      <!-- Password -->
-
-      <mat-form-field appearance="outline" class="full-width">
-
-        <mat-label>Password</mat-label>
-
-        <input
-          matInput
-          [type]="hidePassword ? 'password' : 'text'"
-          formControlName="password"
-          placeholder="Enter your password">
-
-        <button
-          mat-icon-button
-          matSuffix
-          type="button"
-          (click)="hidePassword = !hidePassword">
-
-          <mat-icon>
-            {{ hidePassword ? 'visibility_off' : 'visibility' }}
-          </mat-icon>
-
-        </button>
-
-        <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
-          Password is required
-        </mat-error>
-
-        <mat-error *ngIf="loginForm.get('password')?.hasError('minlength')">
-          Password must be at least 8 characters
-        </mat-error>
-
-      </mat-form-field>
-
-      <!-- Remember Me -->
-
-      <div class="options">
-
-        <mat-checkbox formControlName="rememberMe">
-          Remember Me
-        </mat-checkbox>
-
-        <a routerLink="/forgot-password">Forgot Password?</a>
-
+  <!-- Center-aligned Glassmorphism Login Card -->
+  <div class="login-card-wrapper">
+    <div class="glass-card">
+      <!-- Header / Logo -->
+      <div class="card-header">
+        <div class="brand-badge">
+          <span class="material-icons brand-icon">local_shipping</span>
+        </div>
+        <h1 class="brand-title">Smart Fleet</h1>
+        <p class="brand-subtitle">Real-Time Fleet & Route Optimization Platform</p>
       </div>
 
-      <!-- Login Button -->
+      <!-- Error Alert -->
+      @if (loginError) {
+        <div class="error-alert">
+          <span class="material-icons">error_outline</span>
+          <span>{{ loginError }}</span>
+        </div>
+      }
 
-      <button
-        mat-raised-button
-        color="primary"
-        class="login-button"
-        type="submit">
+      <!-- Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="login()" class="login-form">
 
-        Login
+        <!-- Email Field -->
+        <div class="field-container">
+          <label class="field-label">Email Address</label>
+          <div class="input-box" [class.input-error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+            <span class="material-icons field-icon">mail_outline</span>
+            <input
+              type="email"
+              formControlName="email"
+              placeholder="admin@smartfleet.com"
+              class="custom-input" />
+          </div>
+          @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+            <span class="error-text">{{ getEmailError() }}</span>
+          }
+        </div>
 
-      </button>
+        <!-- Password Field -->
+        <div class="field-container">
+          <label class="field-label">Password</label>
+          <div class="input-box" [class.input-error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+            <span class="material-icons field-icon">lock_outline</span>
+            <input
+              [type]="hidePassword ? 'password' : 'text'"
+              formControlName="password"
+              placeholder="Enter your password"
+              class="custom-input" />
+            <button type="button" class="toggle-eye" (click)="hidePassword = !hidePassword">
+              <span class="material-icons">{{ hidePassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+          @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+            <span class="error-text">{{ getPasswordError() }}</span>
+          }
+        </div>
 
-    </form>
+        <!-- Options -->
+        <div class="options-bar">
+          <label class="remember-me">
+            <input type="checkbox" formControlName="rememberMe" class="custom-checkbox" />
+            <span>Remember me</span>
+          </label>
+          <a routerLink="/forgot-password" class="forgot-link">Forgot password?</a>
+        </div>
 
-  </mat-card>
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          class="submit-button"
+          [disabled]="loginForm.invalid || isLoading"
+          [class.button-loading]="isLoading">
+          @if (isLoading) {
+            <span class="spinner"></span>
+            <span>Authenticating...</span>
+          } @else {
+            <span class="material-icons">arrow_forward</span>
+            <span>Sign In to Dashboard</span>
+          }
+        </button>
+      </form>
 
+      <!-- Demo Tip -->
+      <div class="demo-badge">
+        <span class="material-icons icon-tip">bolt</span>
+        <span><b>Quick Access:</b> Use any valid email + 8 character password</span>
+      </div>
+
+      <!-- Footer -->
+      <div class="card-footer">
+        <span>© 2026 Smart Fleet System · Enterprise Edition</span>
+      </div>
+    </div>
+  </div>
 </div>

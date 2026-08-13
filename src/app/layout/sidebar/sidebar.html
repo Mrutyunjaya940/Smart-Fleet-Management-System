@@ -1,25 +1,43 @@
-<div class="sidebar">
+<nav class="sidebar" [class.collapsed]="layoutService.isSidebarCollapsed()">
 
-  <div class="logo">
-
-    <h2>{{ appName }}</h2>
-
+  <!-- Brand Section -->
+  <div class="sidebar-brand">
+    <div class="brand-icon">
+      <span class="material-icons">local_shipping</span>
+    </div>
+    <div class="brand-text">
+      <h2 class="brand-name">{{ appName }}</h2>
+      <span class="brand-tag">{{ appTagline }}</span>
+    </div>
+    <button class="collapse-toggle" (click)="toggleCollapse()" title="Toggle Sidebar Width">
+      <span class="material-icons">{{ layoutService.isSidebarCollapsed() ? 'chevron_right' : 'chevron_left' }}</span>
+    </button>
   </div>
 
+  <!-- Navigation Menu -->
   <ul class="menu">
+    @for (menu of menus; track menu.name) {
+      <li
+        [routerLink]="menu.route"
+        routerLinkActive="active"
+        [matTooltip]="layoutService.isSidebarCollapsed() ? menu.name : ''"
+        matTooltipPosition="right"
+        class="menu-item">
 
-    @for(menu of menus; track menu.name){
-
-      <li>
-
-        <span class="icon">{{menu.icon}}</span>
-
-        <span>{{menu.name}}</span>
+        <span class="menu-icon material-icons">{{ menu.icon }}</span>
+        <span class="menu-label">{{ menu.name }}</span>
+        <span class="active-indicator"></span>
 
       </li>
-
     }
-
   </ul>
 
-</div>
+  <!-- Footer Status -->
+  <div class="sidebar-footer">
+    <div class="footer-badge" [matTooltip]="layoutService.isSidebarCollapsed() ? 'System Online' : ''" matTooltipPosition="right">
+      <span class="dot-live"></span>
+      <span class="footer-status-text">System Online</span>
+    </div>
+  </div>
+
+</nav>

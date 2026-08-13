@@ -1,37 +1,38 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  private apiUrl = 'http://localhost:8080/api/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
 
   constructor(private http: HttpClient) {}
 
-  login(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, data);
+  login(data: { email: string; password: string }): Observable<{ token: string }> {
+    return this.http.post<{ token: string }>(`${this.apiUrl}/login`, data);
   }
 
-  forgotPassword(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/forgot-password`, data);
+  forgotPassword(data: { email: string }): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/forgot-password`, data);
   }
 
-  verifyOtp(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/verify-otp`, data);
+  verifyOtp(data: { otp: string; email: string }): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/verify-otp`, data);
   }
 
-  resetPassword(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/reset-password`, data);
+  resetPassword(data: { password: string; token: string }): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/reset-password`, data);
   }
 
-  logout() {
+  logout(): void {
     localStorage.removeItem('access_token');
   }
 
-  saveToken(token: string) {
+  saveToken(token: string): void {
     localStorage.setItem('access_token', token);
   }
 
@@ -42,5 +43,4 @@ export class AuthService {
   isLoggedIn(): boolean {
     return this.getToken() !== null;
   }
-
 }

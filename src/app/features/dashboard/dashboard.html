@@ -1,1 +1,166 @@
-<p>dashboard works!</p>
+<div class="dashboard-page">
+
+  <!-- Header Banner -->
+  <div class="dash-header">
+    <div>
+      <h1 class="dash-title">
+        <span class="wave">👋</span> Welcome back, <span class="highlight">Admin</span>
+      </h1>
+      <p class="dash-subtitle">Here's real-time performance &amp; telemetry for your fleet today.</p>
+    </div>
+    <div class="header-meta">
+      <span class="live-badge">
+        <span class="dot"></span> Live Telemetry
+      </span>
+      <span class="dash-date">{{ currentTime | date:'EEEE, d MMM yyyy · HH:mm' }}</span>
+    </div>
+  </div>
+
+  <!-- Top Row: Weather Widget + KPI Grid -->
+  <div class="top-row-grid">
+
+    <!-- Weather Widget -->
+    <div class="weather-card glass-card">
+      <div class="weather-top">
+        <div>
+          <span class="weather-city">{{ weather.city }}</span>
+          <h2 class="weather-temp">{{ weather.temp }}°C</h2>
+          <span class="weather-cond">{{ weather.condition }}</span>
+        </div>
+        <div class="weather-icon-wrap">
+          <span class="material-icons weather-icon">{{ weather.icon }}</span>
+        </div>
+      </div>
+      <div class="weather-details">
+        <div class="w-item">
+          <span class="material-icons">water_drop</span>
+          <span>Hum: {{ weather.humidity }}</span>
+        </div>
+        <div class="w-item">
+          <span class="material-icons">air</span>
+          <span>Wind: {{ weather.wind }}</span>
+        </div>
+        <div class="w-item">
+          <span class="material-icons">visibility</span>
+          <span>Vis: {{ weather.visibility }}</span>
+        </div>
+      </div>
+      <div class="weather-advisory">
+        <span class="material-icons">check_circle</span>
+        <span>{{ weather.advisory }}</span>
+      </div>
+    </div>
+
+    <!-- KPI Cards Grid -->
+    <div class="kpi-grid">
+      @for (card of kpiCards; track card.title) {
+        <div class="kpi-card kpi-{{ card.color }}">
+          <div class="kpi-icon">
+            <span class="material-icons">{{ card.icon }}</span>
+          </div>
+          <div class="kpi-content">
+            <p class="kpi-label">{{ card.title }}</p>
+            <h2 class="kpi-value">{{ card.value }}</h2>
+            <span class="kpi-trend" [class.up]="card.trendUp" [class.down]="!card.trendUp">
+              <span class="material-icons trend-icon">{{ card.trendUp ? 'trending_up' : 'trending_down' }}</span>
+              {{ card.trend }}
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+
+  </div>
+
+  <!-- Analytics Row: Chart.js Bar Chart + Fleet Status Breakdown -->
+  <div class="mid-grid">
+
+    <!-- Chart: Revenue vs Fuel Expense -->
+    <div class="chart-card glass-card">
+      <div class="card-header-row">
+        <h3>
+          <span class="material-icons">bar_chart</span>
+          Revenue vs. Fuel Expenses (6 Months)
+        </h3>
+        <span class="chart-tag">FY 2026</span>
+      </div>
+      <div class="chart-wrapper">
+        <canvas
+          baseChart
+          [data]="chartData"
+          [options]="chartOptions"
+          [type]="'bar'">
+        </canvas>
+      </div>
+    </div>
+
+    <!-- Fleet Status Breakdown -->
+    <div class="status-card glass-card">
+      <div class="card-header-row">
+        <h3><span class="material-icons">donut_large</span> Fleet Operational Status</h3>
+        <a routerLink="/fleet" class="view-link">View Fleet →</a>
+      </div>
+      <div class="status-list">
+        @for (s of fleetStatus; track s.label) {
+          <div class="status-row">
+            <div class="status-label-group">
+              <span class="status-dot" [style.background]="s.color"></span>
+              <span class="status-label">{{ s.label }}</span>
+            </div>
+            <div class="status-bar-wrap">
+              <div class="status-bar-fill" [style.width.%]="s.percent" [style.background]="s.color"></div>
+            </div>
+            <span class="status-count">{{ s.count }}</span>
+          </div>
+        }
+      </div>
+      <div class="total-row">
+        <span>Total Fleet Monitored</span>
+        <strong>120 Vehicles</strong>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Row: Mini Live Google Map Preview + Recent Activity Feed -->
+  <div class="bottom-grid">
+
+    <!-- Live Map Preview Widget -->
+    <div class="map-preview-card glass-card">
+      <div class="card-header-row">
+        <h3>
+          <span class="material-icons">my_location</span>
+          Live Vehicle Map Preview
+        </h3>
+        <a routerLink="/tracking" class="view-link">Full Map →</a>
+      </div>
+      <div id="dashboardPreviewMap" class="preview-map-box"></div>
+    </div>
+
+    <!-- Quick Actions & Recent Activity -->
+    <div class="activity-card glass-card">
+      <div class="card-header-row">
+        <h3><span class="material-icons">history</span> Recent Activity &amp; Alerts</h3>
+        <span class="badge-new">{{ recentActivities.length }} events</span>
+      </div>
+      <div class="activity-list">
+        @for (activity of recentActivities; track activity.id) {
+          <div class="activity-item activity-{{ activity.type }}">
+            <div class="activity-icon">
+              <span class="material-icons">{{ activity.icon }}</span>
+            </div>
+            <div class="activity-body">
+              <p class="activity-msg">{{ activity.message }}</p>
+              <span class="activity-time">
+                <span class="material-icons time-icon">schedule</span>
+                {{ activity.time }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+
+</div>

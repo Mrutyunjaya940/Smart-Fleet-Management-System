@@ -1,29 +1,23 @@
-.layout{
-
-  display:flex;
-
-  height:100vh;
-
-  background:#f5f7fa;
-
+.layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg-main, #f1f5f9);
 }
 
-.main-container{
-
-  flex:1;
-
-  display:flex;
-
-  flex-direction:column;
-
+.main-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
 }
 
-.content{
-
-  flex:1;
-
-  padding:30px;
-
-  overflow:auto;
-
+.content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg-main, #f1f5f9);
 }
+
+/* Remove inner padding — each page manages its own */

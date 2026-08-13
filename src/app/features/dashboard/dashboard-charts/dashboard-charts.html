@@ -1,0 +1,31 @@
+<div class="charts-grid">
+
+  <!-- Left Column: Fuel Consumption -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <h4>Fuel Consumption (Last 7 Days)</h4>
+    </div>
+    <div class="chart-container">
+      <canvas baseChart
+              [data]="fuelChartData"
+              [options]="fuelChartOptions"
+              [type]="'bar'">
+      </canvas>
+    </div>
+  </div>
+
+  <!-- Right Column: Fleet Status -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <h4>Real-Time Fleet Status</h4>
+    </div>
+    <div class="chart-container">
+      <canvas baseChart
+              [data]="statusChartData"
+              [options]="statusChartOptions"
+              [type]="'doughnut'">
+      </canvas>
+    </div>
+  </div>
+
+</div>

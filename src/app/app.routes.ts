@@ -1,43 +1,138 @@
 import { Routes } from '@angular/router';
 
-
 import { Login } from './features/authentication/login/login';
 import { ForgotPassword } from './features/authentication/forgot-password/forgot-password';
-import { DashboardLayout } from './layout/dashboard-layout/dashboard-layout';
 import { OtpVerification } from './features/authentication/otp-verification/otp-verification';
 import { ResetPassword } from './features/authentication/reset-password/reset-password';
 import { authGuard } from './features/authentication/guards/auth.guard';
 
+import { DashboardLayout } from './layout/dashboard-layout/dashboard-layout';
+import { DashboardComponent } from './features/dashboard/dashboard';
+import { Fleet } from './features/fleet/fleet';
+import { DriverList } from './features/driver/driver-list/driver-list';
+import { LiveTracking } from './features/tracking/live-tracking/live-tracking';
+import { RouteManagement } from './features/routes/route-management/route-management';
+import { TripManagement } from './features/trips/trip-management/trip-management';
+import { FuelManagement } from './features/fuel/fuel-management/fuel-management';
+import { RouteOptimization } from './features/route-optimization/route-optimization';
+import { Reports } from './features/reports/reports';
+import { Settings } from './features/settings/settings';
+
 export const routes: Routes = [
 
+  // Default redirect
   {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full'
   },
 
+  // Public auth routes
   {
     path: 'login',
     component: Login
   },
-
   {
     path: 'forgot-password',
     component: ForgotPassword
+  },
+  {
+    path: 'otp-verification',
+    component: OtpVerification
   },
   {
     path: 'reset-password',
     component: ResetPassword
   },
 
+  // Protected routes (require auth)
   {
-    path: 'otp-verification',
-    component: OtpVerification
+    path: 'app',
+    component: DashboardLayout,
+    canActivate: [authGuard],
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard',          component: DashboardComponent },
+      { path: 'fleet',              component: Fleet },
+      { path: 'drivers',            component: DriverList },
+      { path: 'tracking',           component: LiveTracking },
+      { path: 'routes',             component: RouteManagement },
+      { path: 'trips',              component: TripManagement },
+      { path: 'fuel',               component: FuelManagement },
+      { path: 'route-optimization', component: RouteOptimization },
+      { path: 'reports',            component: Reports },
+      { path: 'settings',           component: Settings }
+    ]
   },
 
+  // Top-level shortcut aliases so existing sidebar links (/dashboard, /fleet etc.) still work
   {
     path: 'dashboard',
     component: DashboardLayout,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    children: [
+      { path: '', component: DashboardComponent }
+    ]
+  },
+  {
+    path: 'fleet',
+    component: DashboardLayout,
+    canActivate: [authGuard],
+    children: [{ path: '', component: Fleet }]
+  },
+  {
+    path: 'drivers',
+    component: DashboardLayout,
+    canActivate: [authGuard],
+    children: [{ path: '', component: DriverList }]
+  },
+  {
+    path: 'tracking',
+    component: DashboardLayout,
+    canActivate: [authGuard],
+    children: [{ path: '', component: LiveTracking }]
+  },
+  {
+    path: 'routes',
+    component: DashboardLayout,
+    canActivate: [authGuard],
+    children: [{ path: '', component: RouteManagement }]
+  },
+  {
+    path: 'trips',
+    component: DashboardLayout,
+    canActivate: [authGuard],
+    children: [{ path: '', component: TripManagement }]
+  },
+  {
+    path: 'fuel',
+    component: DashboardLayout,
+    canActivate: [authGuard],
+    children: [{ path: '', component: FuelManagement }]
+  },
+  {
+    path: 'route-optimization',
+    component: DashboardLayout,
+    canActivate: [authGuard],
+    children: [{ path: '', component: RouteOptimization }]
+  },
+  {
+    path: 'reports',
+    component: DashboardLayout,
+    canActivate: [authGuard],
+    children: [{ path: '', component: Reports }]
+  },
+  {
+    path: 'settings',
+    component: DashboardLayout,
+    canActivate: [authGuard],
+    children: [{ path: '', component: Settings }]
+  },
+
+  // Fallback
+  {
+    path: '**',
+    redirectTo: 'login'
   }
+
 ];

@@ -1,0 +1,374 @@
+<div class="fuel-container">
+
+  <!-- Header -->
+  <div class="fuel-header">
+    <div>
+      <h2 class="page-title">⛽ Fuel Analytics &amp; Expense Tracking</h2>
+      <p class="page-subtitle">Monitor fuel consumption, vehicle mileage efficiency, and partner station refuel logs</p>
+    </div>
+
+    <button
+      mat-raised-button
+      color="primary"
+      class="add-btn"
+      (click)="openAddModal()">
+      <mat-icon>local_gas_station</mat-icon>
+      <span>Log Refuel Entry</span>
+    </button>
+  </div>
+
+  <!-- Real-Time Computed Stats Cards -->
+  <div class="stats-container">
+
+    <div class="stat-card blue">
+      <div class="card-icon">⛽</div>
+      <div class="card-content">
+        <h2>{{ totalFuel | number }} L</h2>
+        <p>Total Refueled Liters</p>
+      </div>
+    </div>
+
+    <div class="stat-card orange">
+      <div class="card-icon">💸</div>
+      <div class="card-content">
+        <h2>₹{{ totalCost | number }}</h2>
+        <p>Total Fuel Cost</p>
+      </div>
+    </div>
+
+    <div class="stat-card green">
+      <div class="card-icon">⚡</div>
+      <div class="card-content">
+        <h2>{{ averageMileage }} km/L</h2>
+        <p>Fleet Avg Mileage</p>
+      </div>
+    </div>
+
+    <div class="stat-card red">
+      <div class="card-icon">⚠️</div>
+      <div class="card-content">
+        <h2>{{ lowFuelAlerts }} Vehicles</h2>
+        <p>Low Fuel Warnings</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Analytics Row: Expense Chart + Efficiency Leaderboard -->
+  <div class="mid-grid">
+
+    <!-- Chart: Monthly Expenses -->
+    <div class="chart-card glass-card">
+      <div class="card-header-row">
+        <h3><span class="material-icons">bar_chart</span> Monthly Fuel Expense (₹)</h3>
+        <span class="chart-tag">H1 2026</span>
+      </div>
+      <div class="chart-wrapper">
+        <canvas
+          baseChart
+          [data]="barChartData"
+          [options]="barChartOptions"
+          [type]="'bar'">
+        </canvas>
+      </div>
+    </div>
+
+    <!-- Top Fuel Efficient Vehicles -->
+    <div class="leaderboard-card glass-card">
+      <div class="card-header-row">
+        <h3><span class="material-icons">emoji_events</span> Top Efficient Vehicles</h3>
+        <span class="view-tag">Eco Leaderboard</span>
+      </div>
+      <div class="leaderboard-list">
+        @for (item of topVehicles; track item.vehicle; let idx = $index) {
+          <div class="leader-item">
+            <div class="rank-badge" [class.gold]="idx === 0" [class.silver]="idx === 1" [class.bronze]="idx === 2">
+              #{{ idx + 1 }}
+            </div>
+            <div class="leader-info">
+              <h4>{{ item.vehicle }}</h4>
+              <p>{{ item.driver }}</p>
+            </div>
+            <div class="leader-score">
+              <span class="mileage-badge">{{ item.mileage }}</span>
+              <span class="score-pct">{{ item.efficiency }}%</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Verified Fuel Stations Map -->
+  <div class="map-card glass-card">
+    <div class="card-header-row">
+      <h3>
+        <span class="material-icons map-icon">map</span>
+        Verified Partner Fuel Stations Map (Bhubaneswar Hub)
+      </h3>
+    </div>
+    <div id="fuelMap" class="google-map-view"></div>
+  </div>
+
+  <!-- Search & Toolbar -->
+  <div class="toolbar-card">
+    <h3><span class="material-icons">receipt_long</span> Fuel Transaction Logs</h3>
+    <mat-form-field appearance="outline" class="search-box">
+      <mat-label>Search Refuel Logs</mat-label>
+      <input
+        #input
+        matInput
+        placeholder="Search by vehicle, driver, or station..."
+        (keyup)="applyFilter($event)">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Fuel Logs Table -->
+  <div class="table-container">
+
+    <table
+      mat-table
+      [dataSource]="dataSource"
+      class="fuel-table">
+
+      <!-- Vehicle -->
+      <ng-container matColumnDef="vehicle">
+        <th mat-header-cell *matHeaderCellDef>Vehicle Number</th>
+        <td mat-cell *matCellDef="let fuel">
+          <span class="plate-badge">{{ fuel.vehicle }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Driver -->
+      <ng-container matColumnDef="driver">
+        <th mat-header-cell *matHeaderCellDef>Driver</th>
+        <td mat-cell *matCellDef="let fuel">{{ fuel.driver }}</td>
+      </ng-container>
+
+      <!-- Liters -->
+      <ng-container matColumnDef="liters">
+        <th mat-header-cell *matHeaderCellDef>Liters</th>
+        <td mat-cell *matCellDef="let fuel">
+          <strong>{{ fuel.liters }} L</strong>
+        </td>
+      </ng-container>
+
+      <!-- Total Cost -->
+      <ng-container matColumnDef="totalCost">
+        <th mat-header-cell *matHeaderCellDef>Total Cost (₹)</th>
+        <td mat-cell *matCellDef="let fuel">
+          <span class="cost-highlight">₹{{ fuel.totalCost | number }}</span>
+          <span class="sub-price">(₹{{ fuel.pricePerLiter }}/L)</span>
+        </td>
+      </ng-container>
+
+      <!-- Mileage -->
+      <ng-container matColumnDef="mileage">
+        <th mat-header-cell *matHeaderCellDef>Mileage</th>
+        <td mat-cell *matCellDef="let fuel">
+          <span class="mileage-pill">{{ fuel.mileage }} km/L</span>
+        </td>
+      </ng-container>
+
+      <!-- Station -->
+      <ng-container matColumnDef="station">
+        <th mat-header-cell *matHeaderCellDef>Refuel Station</th>
+        <td mat-cell *matCellDef="let fuel">{{ fuel.station }}</td>
+      </ng-container>
+
+      <!-- Payment Method -->
+      <ng-container matColumnDef="paymentMethod">
+        <th mat-header-cell *matHeaderCellDef>Payment</th>
+        <td mat-cell *matCellDef="let fuel">
+          <span class="pay-chip">{{ fuel.paymentMethod }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Date -->
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef>Date</th>
+        <td mat-cell *matCellDef="let fuel">{{ fuel.date }}</td>
+      </ng-container>
+
+      <!-- Actions -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let fuel" (click)="$event.stopPropagation()">
+          <button mat-icon-button color="primary" title="View Details" (click)="viewFuelDetails(fuel)">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" title="Delete Log" (click)="deleteFuel(fuel)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row" (click)="viewFuelDetails(row)"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" colspan="9">
+          No refuel entries matching "{{ input.value }}"
+        </td>
+      </tr>
+
+    </table>
+
+  </div>
+
+  <!-- Slide-Out Fuel Details Drawer -->
+  @if (isDrawerOpen && selectedFuel) {
+    <div class="drawer-overlay" (click)="closeDrawer()"></div>
+    <aside class="fuel-details-drawer">
+      <div class="drawer-header">
+        <div class="drawer-title-block">
+          <span class="material-icons drawer-icon">local_gas_station</span>
+          <div>
+            <h3>Refuel Receipt #{{ selectedFuel.id }}</h3>
+            <p>{{ selectedFuel.vehicle }} · {{ selectedFuel.date }}</p>
+          </div>
+        </div>
+        <button class="close-btn" (click)="closeDrawer()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="drawer-body">
+        <div class="receipt-card">
+          <h4 class="card-subtitle"><span class="material-icons">receipt</span> Refuel Transaction Summary</h4>
+          <div class="spec-grid">
+            <div class="spec-item">
+              <span class="label">Vehicle Plate</span>
+              <span class="val">{{ selectedFuel.vehicle }}</span>
+            </div>
+            <div class="spec-item">
+              <span class="label">Driver Name</span>
+              <span class="val">{{ selectedFuel.driver }}</span>
+            </div>
+            <div class="spec-item">
+              <span class="label">Station Location</span>
+              <span class="val">{{ selectedFuel.station }}</span>
+            </div>
+            <div class="spec-item">
+              <span class="label">Fuel Quantity</span>
+              <span class="val">{{ selectedFuel.liters }} Liters</span>
+            </div>
+            <div class="spec-item">
+              <span class="label">Price / Liter</span>
+              <span class="val">₹{{ selectedFuel.pricePerLiter }}</span>
+            </div>
+            <div class="spec-item">
+              <span class="label">Total Expense</span>
+              <span class="val highlight-val">₹{{ selectedFuel.totalCost | number }}</span>
+            </div>
+            <div class="spec-item">
+              <span class="label">Mileage Efficiency</span>
+              <span class="val">{{ selectedFuel.mileage }} km/L</span>
+            </div>
+            <div class="spec-item">
+              <span class="label">Odometer Reading</span>
+              <span class="val">{{ selectedFuel.odometer | number }} km</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  }
+
+  <!-- Log Refuel Entry Modal -->
+  @if (isAddModalOpen) {
+    <div class="modal-overlay" (click)="closeAddModal()"></div>
+    <div class="add-modal glass-modal">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span class="material-icons title-icon">local_gas_station</span>
+          Log Refuel Entry
+        </h3>
+        <button class="close-btn" (click)="closeAddModal()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form [formGroup]="fuelForm" class="modal-form-grid">
+
+          <!-- Vehicle -->
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Vehicle *</mat-label>
+            <mat-select formControlName="vehicle">
+              @for (v of vehiclesList; track v) {
+                <mat-option [value]="v">{{ v }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Driver -->
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Driver *</mat-label>
+            <mat-select formControlName="driver">
+              @for (d of driversList; track d) {
+                <mat-option [value]="d">{{ d }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Station -->
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Fuel Station *</mat-label>
+            <mat-select formControlName="station">
+              @for (s of stationsList; track s) {
+                <mat-option [value]="s">{{ s }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Liters -->
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Liters Refueled (L) *</mat-label>
+            <input matInput type="number" formControlName="liters">
+          </mat-form-field>
+
+          <!-- Price per liter -->
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Price per Liter (₹) *</mat-label>
+            <input matInput type="number" formControlName="pricePerLiter">
+          </mat-form-field>
+
+          <!-- Mileage -->
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Estimated Mileage (km/L)</mat-label>
+            <input matInput type="number" formControlName="mileage">
+          </mat-form-field>
+
+          <!-- Odometer -->
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Odometer Reading (km)</mat-label>
+            <input matInput type="number" formControlName="odometer">
+          </mat-form-field>
+
+          <!-- Payment Method -->
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Payment Method</mat-label>
+            <mat-select formControlName="paymentMethod">
+              <mat-option value="Corporate Card">Corporate Card</mat-option>
+              <mat-option value="UPI / QR">UPI / Digital QR</mat-option>
+              <mat-option value="PetroCard">PetroCard Fleet Token</mat-option>
+              <mat-option value="Cash">Cash Reimbursement</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button mat-button (click)="closeAddModal()">Cancel</button>
+        <button mat-raised-button color="primary" [disabled]="fuelForm.invalid" (click)="submitAddFuel()">
+          <mat-icon>check</mat-icon> Save Refuel Entry
+        </button>
+      </div>
+    </div>
+  }
+
+</div>

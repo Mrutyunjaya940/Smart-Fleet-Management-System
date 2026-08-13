@@ -1,40 +1,155 @@
 <header class="header">
 
+  <!-- Left Section: Toggle & Breadcrumb -->
   <div class="left-section">
-
-    <h2>{{ title }}</h2>
-
-  </div>
-
-  <div class="right-section">
-
-    <input
-      type="text"
-      placeholder="Search..."
-      class="search-box"
-    />
-
-    <button class="icon-btn">🔔</button>
-
-    <button class="icon-btn">🌙</button>
-
-    <button
-      mat-raised-button
-      color="warn"
-      (click)="logout()">
-      Logout
+    <button class="menu-toggle" (click)="toggleSidebar()" title="Toggle Sidebar">
+      <span class="material-icons">menu</span>
     </button>
 
-    <div class="profile">
+    <!-- Dynamic Breadcrumb Navigation -->
+    <div class="breadcrumb-container">
+      <nav class="breadcrumbs">
+        @for (crumb of breadcrumbs; track crumb.label; let last = $last) {
+          <a [routerLink]="crumb.url" class="crumb-link" [class.active-crumb]="last">
+            {{ crumb.label }}
+          </a>
+          @if (!last) {
+            <span class="material-icons crumb-sep">chevron_right</span>
+          }
+        }
+      </nav>
+      <h2 class="header-title">{{ title }}</h2>
+    </div>
+  </div>
 
-      <div class="avatar">
-        A
+  <!-- Right Section: Search, Notifications, Theme, Profile -->
+  <div class="right-section">
+
+    <!-- Search Box -->
+    <div class="search-container">
+      <span class="material-icons search-icon">search</span>
+      <input
+        type="text"
+        placeholder="Search vehicles, drivers..."
+        class="search-box" />
+    </div>
+
+    <!-- Notifications Drawer Trigger -->
+    <button
+      class="icon-btn notif-btn"
+      [class.active-btn]="layoutService.isNotifDrawerOpen()"
+      (click)="toggleNotifDrawer()"
+      title="Notifications Drawer">
+      <span class="material-icons">notifications</span>
+      @if (layoutService.unreadCount > 0) {
+        <span class="notif-badge">{{ layoutService.unreadCount }}</span>
+      }
+    </button>
+
+    <!-- Theme Switch -->
+    <button
+      class="icon-btn"
+      title="Toggle Theme"
+      (click)="toggleTheme()">
+      <span class="material-icons">{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</span>
+    </button>
+
+    <!-- Profile Dropdown Trigger -->
+    <div class="profile" (click)="toggleProfileMenu()">
+      <div class="avatar">A</div>
+      <div class="profile-info">
+        <span class="profile-name">Admin User</span>
+        <span class="profile-role">Fleet Manager</span>
       </div>
-
-      <span>Admin</span>
-
+      <span class="material-icons profile-arrow">arrow_drop_down</span>
     </div>
 
   </div>
 
+  <!-- Profile Dropdown Popup Menu -->
+  @if (layoutService.isProfileMenuOpen()) {
+    <div class="profile-dropdown-backdrop" (click)="layoutService.closeProfileMenu()"></div>
+    <div class="profile-menu-card glass-menu">
+      <div class="profile-card-header">
+        <div class="avatar large-avatar">A</div>
+        <div>
+          <h4>Admin User</h4>
+          <p>admin@smartfleet.com</p>
+          <span class="role-badge">Fleet Manager</span>
+        </div>
+      </div>
+      <div class="menu-divider"></div>
+      <ul class="profile-actions">
+        <li routerLink="/settings" (click)="layoutService.closeProfileMenu()">
+          <span class="material-icons">person_outline</span>
+          <span>My Profile &amp; Account</span>
+        </li>
+        <li routerLink="/settings" (click)="layoutService.closeProfileMenu()">
+          <span class="material-icons">settings_applications</span>
+          <span>System Configuration</span>
+        </li>
+        <li routerLink="/settings" (click)="layoutService.closeProfileMenu()">
+          <span class="material-icons">shield</span>
+          <span>Roles &amp; Permissions</span>
+        </li>
+        <li class="logout-action" (click)="logout()">
+          <span class="material-icons">logout</span>
+          <span>Sign Out</span>
+        </li>
+      </ul>
+    </div>
+  }
+
 </header>
+
+<!-- Slide-Out Notifications Drawer -->
+@if (layoutService.isNotifDrawerOpen()) {
+  <div class="drawer-backdrop" (click)="layoutService.closeNotifDrawer()"></div>
+  <aside class="notif-drawer glass-drawer">
+    <div class="drawer-header">
+      <div class="drawer-title-wrap">
+        <span class="material-icons drawer-icon">notifications_active</span>
+        <h3>Notifications</h3>
+        <span class="unread-chip">{{ layoutService.unreadCount }} new</span>
+      </div>
+      <button class="close-drawer-btn" (click)="layoutService.closeNotifDrawer()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <div class="drawer-actions-bar">
+      <button class="drawer-text-btn" (click)="layoutService.markAllNotificationsAsRead()">
+        <span class="material-icons">done_all</span> Mark all read
+      </button>
+      <button class="drawer-text-btn danger-text" (click)="layoutService.clearNotifications()">
+        <span class="material-icons">delete_sweep</span> Clear all
+      </button>
+    </div>
+
+    <div class="drawer-content">
+      @if (layoutService.notifications().length === 0) {
+        <div class="empty-notif">
+          <span class="material-icons empty-icon">notifications_off</span>
+          <p>No new notifications</p>
+        </div>
+      } @else {
+        @for (item of layoutService.notifications(); track item.id) {
+          <div class="notif-item" [class.unread]="!item.read" [class]="'notif-' + item.type">
+            <div class="notif-type-icon">
+              <span class="material-icons">
+                {{ item.type === 'warning' ? 'warning' : item.type === 'error' ? 'report_problem' : 'info' }}
+              </span>
+            </div>
+            <div class="notif-body">
+              <div class="notif-head">
+                <h4>{{ item.title }}</h4>
+                <span class="notif-time">{{ item.time }}</span>
+              </div>
+              <p class="notif-msg">{{ item.message }}</p>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </aside>
+}

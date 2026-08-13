@@ -1,0 +1,160 @@
+<div class="tracking-container">
+
+  <!-- Header & Mode Switcher -->
+  <div class="page-header">
+    <div>
+      <h2>📍 GPS Tracking &amp; Route Playback</h2>
+      <p>Monitor live vehicle positions or replay historical trip routes</p>
+    </div>
+
+    <!-- Mode Switcher -->
+    <div class="mode-tabs">
+      <button class="tab-btn" [class.active]="activeTab === 'live'" (click)="switchTab('live')">
+        <span class="material-icons">my_location</span>
+        Live Tracking
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'playback'" (click)="switchTab('playback')">
+        <span class="material-icons">history</span>
+        Route Playback
+      </button>
+    </div>
+  </div>
+
+  <!-- LIVE TRACKING MODE -->
+  @if (activeTab === 'live') {
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <h2>{{ vehicles.length }}</h2>
+        <p>Total Vehicles</p>
+      </div>
+      <div class="stat-card green">
+        <h2>{{ movingCount }}</h2>
+        <p>Moving</p>
+      </div>
+      <div class="stat-card orange">
+        <h2>{{ idleCount }}</h2>
+        <p>Idle</p>
+      </div>
+      <div class="stat-card red">
+        <h2>{{ offlineCount }}</h2>
+        <p>Offline</p>
+      </div>
+    </div>
+  }
+
+  <!-- ROUTE PLAYBACK CONTROL PANEL -->
+  @if (activeTab === 'playback') {
+    <div class="playback-panel glass-card">
+      
+      <div class="playback-header">
+        <div class="vehicle-select-wrap">
+          <span class="material-icons select-icon">directions_car</span>
+          <select class="custom-select" [(ngModel)]="selectedPlaybackVehicle" (change)="setupPlaybackMode()">
+            <option value="OD-02-AB-1234">OD-02-AB-1234 (Bhubaneswar → Cuttack)</option>
+            <option value="OD-05-CD-5678">OD-05-CD-5678 (Bhubaneswar → Puri)</option>
+            <option value="OD-10-EF-9012">OD-10-EF-9012 (Airport Express)</option>
+          </select>
+        </div>
+
+        <div class="speed-controls">
+          <span class="speed-label">Speed:</span>
+          <button class="speed-btn" [class.active]="playbackSpeed === 1" (click)="setPlaybackSpeed(1)">1x</button>
+          <button class="speed-btn" [class.active]="playbackSpeed === 2" (click)="setPlaybackSpeed(2)">2x</button>
+          <button class="speed-btn" [class.active]="playbackSpeed === 4" (click)="setPlaybackSpeed(4)">4x</button>
+        </div>
+      </div>
+
+      <!-- Playback Timeline Controls -->
+      <div class="timeline-controls">
+        <button class="play-btn" (click)="togglePlayPause()">
+          <span class="material-icons">{{ isPlaying ? 'pause' : 'play_arrow' }}</span>
+        </button>
+
+        <div class="slider-wrap">
+          <input
+            type="range"
+            min="0"
+            [max]="playbackWaypoints.length - 1"
+            [value]="playbackIndex"
+            (input)="onSliderChange($event)"
+            class="playback-range-slider" />
+          
+          <div class="time-ticks">
+            <span>{{ playbackWaypoints[0].time }}</span>
+            <span>{{ currentWaypoint.time }} ({{ currentWaypoint.locationName }})</span>
+            <span>{{ playbackWaypoints[playbackWaypoints.length - 1].time }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Replay Telemetry Overlay -->
+      <div class="telemetry-bar">
+        <div class="t-item">
+          <span class="label">Time</span>
+          <span class="val">{{ currentWaypoint.time }}</span>
+        </div>
+        <div class="t-item">
+          <span class="label">Current Location</span>
+          <span class="val highlight">{{ currentWaypoint.locationName }}</span>
+        </div>
+        <div class="t-item">
+          <span class="label">Replay Speed</span>
+          <span class="val">{{ currentWaypoint.speed }} km/h</span>
+        </div>
+      </div>
+
+    </div>
+  }
+
+  <!-- Main Map & Fleet List Content -->
+  <div class="tracking-content" [class.playback-layout]="activeTab === 'playback'">
+
+    <!-- Map Section -->
+    <div class="map-card">
+      <div class="card-header">
+        <h3>
+          <span class="material-icons header-icon">map</span>
+          {{ activeTab === 'live' ? 'Live Fleet Google Map' : 'Historical Trip Playback' }}
+        </h3>
+      </div>
+      <div id="map"></div>
+    </div>
+
+    <!-- Vehicle List (Only shown in Live Mode) -->
+    @if (activeTab === 'live') {
+      <div class="vehicle-card">
+        <div class="card-header">
+          <h3>🚚 Fleet Status (Click to Focus)</h3>
+        </div>
+
+        <div
+          class="vehicle-item"
+          *ngFor="let vehicle of vehicles; let i = index"
+          [class.active-item]="selectedVehicle?.id === vehicle.id"
+          (click)="focusVehicle(vehicle, i)">
+
+          <div class="vehicle-info">
+            <h4>{{ vehicle.vehicleNumber }}</h4>
+            <p>{{ vehicle.driver }}</p>
+          </div>
+
+          <div class="vehicle-status">
+            <span
+              class="badge"
+              [ngClass]="{
+                'moving': vehicle.status === 'Moving',
+                'idle': vehicle.status === 'Idle',
+                'offline': vehicle.status === 'Offline'
+              }">
+              {{ vehicle.status }}
+            </span>
+            <p>{{ vehicle.speed }} km/h</p>
+          </div>
+
+        </div>
+      </div>
+    }
+
+  </div>
+
+</div>

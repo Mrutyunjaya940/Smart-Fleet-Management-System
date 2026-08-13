@@ -1,0 +1,45 @@
+<div class="fleet-container">
+
+  <div class="fleet-header">
+
+    <h2>Fleet Management</h2>
+
+    <button mat-raised-button color="primary">
+      + Add Vehicle
+    </button>
+
+  </div>
+
+  <table mat-table [dataSource]="[]" class="mat-elevation-z8">
+
+    <!-- Vehicle Number -->
+    <ng-container matColumnDef="vehicleNumber">
+      <th mat-header-cell *matHeaderCellDef>Vehicle No.</th>
+      <td mat-cell *matCellDef="let vehicle">
+        {{ vehicle.vehicleNumber }}
+      </td>
+    </ng-container>
+
+    <!-- Vehicle Type -->
+    <ng-container matColumnDef="vehicleType">
+      <th mat-header-cell *matHeaderCellDef>Type</th>
+      <td mat-cell *matCellDef="let vehicle">
+        {{ vehicle.vehicleType }}
+      </td>
+    </ng-container>
+
+    <!-- Status -->
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>Status</th>
+      <td mat-cell *matCellDef="let vehicle">
+        {{ vehicle.status }}
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+  </table>
+
+</div>

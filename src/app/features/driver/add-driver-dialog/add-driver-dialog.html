@@ -1,0 +1,79 @@
+<h2 mat-dialog-title class="dialog-title">
+  <span class="material-icons title-icon">person_add</span>
+  <span>{{ isEditMode ? 'Edit Driver Profile' : 'Onboard New Driver' }}</span>
+</h2>
+
+<mat-dialog-content class="dialog-content">
+
+  <form [formGroup]="driverForm" class="form-grid">
+
+    <!-- Driver Full Name -->
+    <mat-form-field appearance="outline" class="fw">
+      <mat-label>Driver Full Name *</mat-label>
+      <input matInput formControlName="name" placeholder="e.g. Rahul Kumar">
+      <mat-icon matSuffix>person</mat-icon>
+    </mat-form-field>
+
+    <!-- Phone -->
+    <mat-form-field appearance="outline" class="fw">
+      <mat-label>Phone Number *</mat-label>
+      <input matInput formControlName="phone" placeholder="e.g. +91 98765 43210">
+      <mat-icon matSuffix>phone</mat-icon>
+    </mat-form-field>
+
+    <!-- Email -->
+    <mat-form-field appearance="outline" class="fw">
+      <mat-label>Email Address</mat-label>
+      <input matInput formControlName="email" placeholder="e.g. rahul@smartfleet.com">
+      <mat-icon matSuffix>email</mat-icon>
+    </mat-form-field>
+
+    <!-- License Number -->
+    <mat-form-field appearance="outline" class="fw">
+      <mat-label>Driver License Number *</mat-label>
+      <input matInput formControlName="licenseNumber" placeholder="e.g. DL-2024-001">
+      <mat-icon matSuffix>badge</mat-icon>
+    </mat-form-field>
+
+    <!-- Experience Years -->
+    <mat-form-field appearance="outline" class="fw">
+      <mat-label>Driving Experience (Years)</mat-label>
+      <input matInput type="number" formControlName="experienceYears" placeholder="e.g. 5">
+      <mat-icon matSuffix>history</mat-icon>
+    </mat-form-field>
+
+    <!-- Assigned Vehicle -->
+    <mat-form-field appearance="outline" class="fw">
+      <mat-label>Assigned Vehicle</mat-label>
+      <mat-select formControlName="assignedVehicle">
+        @for (v of vehiclesList; track v) {
+          <mat-option [value]="v">{{ v }}</mat-option>
+        }
+      </mat-select>
+      <mat-icon matSuffix>directions_car</mat-icon>
+    </mat-form-field>
+
+    <!-- Status -->
+    <mat-form-field appearance="outline" class="fw full-width-col">
+      <mat-label>Driver Status</mat-label>
+      <mat-select formControlName="status">
+        <mat-option value="Available">Available (Ready for duty)</mat-option>
+        <mat-option value="On Trip">On Trip (Active mission)</mat-option>
+        <mat-option value="Off Duty">Off Duty (On leave / rest)</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+  </form>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button (click)="close()">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    [disabled]="driverForm.invalid"
+    (click)="save()">
+    <mat-icon>check</mat-icon> {{ isEditMode ? 'Update Profile' : 'Save Driver' }}
+  </button>
+</mat-dialog-actions>

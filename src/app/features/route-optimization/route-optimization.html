@@ -1,1 +1,169 @@
-<p>route-optimization works!</p>
+<div class="route-page">
+
+  <!-- Floating Ambient Glows -->
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">
+        <span class="material-icons title-icon">alt_route</span>
+        Route Optimization
+      </h1>
+      <p class="page-subtitle">Plan fastest, safest and fuel-efficient routes across Bhubaneswar, Jatni &amp; Khordha</p>
+    </div>
+
+    <div class="header-actions">
+      <button mat-stroked-button class="action-btn-secondary" (click)="refreshForm()">
+        <mat-icon>refresh</mat-icon>
+        <span>Reset</span>
+      </button>
+
+      <button mat-raised-button class="action-btn-primary" (click)="exportRoute()">
+        <mat-icon>download</mat-icon>
+        <span>Export Report</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Route Planner Glass Card -->
+  <div class="planner-card glass-panel">
+    <div class="planner-header">
+      <div>
+        <h2 class="section-title">
+          <span class="material-icons">navigation</span>
+          Smart Route Planner
+        </h2>
+        <p class="section-sub">Select origin &amp; destination to calculate AI-optimized navigation</p>
+      </div>
+
+      <button mat-raised-button class="optimize-btn" (click)="optimizeRoute()">
+        <span class="material-icons">bolt</span>
+        <span>Optimize Route</span>
+      </button>
+    </div>
+
+    <form [formGroup]="routeForm">
+      <div class="planner-grid">
+
+        <!-- Source Location -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Source Location</mat-label>
+          <mat-select formControlName="source" (selectionChange)="optimizeRoute()">
+            @for (loc of locationKeys; track loc) {
+              <mat-option [value]="loc">{{ loc }}</mat-option>
+            }
+          </mat-select>
+          <mat-icon matPrefix class="prefix-icon">trip_origin</mat-icon>
+        </mat-form-field>
+
+        <!-- Swap Button -->
+        <div class="swap-wrapper">
+          <button mat-mini-fab type="button" class="swap-button" (click)="swapLocations()" title="Swap Source & Destination">
+            <mat-icon>swap_horiz</mat-icon>
+          </button>
+        </div>
+
+        <!-- Destination Location -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Destination Location</mat-label>
+          <mat-select formControlName="destination" (selectionChange)="optimizeRoute()">
+            @for (loc of locationKeys; track loc) {
+              <mat-option [value]="loc">{{ loc }}</mat-option>
+            }
+          </mat-select>
+          <mat-icon matPrefix class="prefix-icon">place</mat-icon>
+        </mat-form-field>
+
+        <!-- Vehicle Selection -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Vehicle</mat-label>
+          <mat-select formControlName="vehicle">
+            <mat-option value="OD-02-AB-1234">OD-02-AB-1234 (Heavy Truck)</mat-option>
+            <mat-option value="OD-05-CD-5678">OD-05-CD-5678 (Delivery Van)</mat-option>
+            <mat-option value="OD-10-EF-9012">OD-10-EF-9012 (Cargo Fleet)</mat-option>
+          </mat-select>
+          <mat-icon matPrefix class="prefix-icon">local_shipping</mat-icon>
+        </mat-form-field>
+
+        <!-- Driver Selection -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Driver</mat-label>
+          <mat-select formControlName="driver">
+            <mat-option value="Rahul Kumar">Rahul Kumar</mat-option>
+            <mat-option value="Amit Das">Amit Das</mat-option>
+            <mat-option value="Suresh Nayak">Suresh Nayak</mat-option>
+          </mat-select>
+          <mat-icon matPrefix class="prefix-icon">person</mat-icon>
+        </mat-form-field>
+
+        <!-- Optimization Strategy -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Optimization Strategy</mat-label>
+          <mat-select formControlName="optimization">
+            <mat-option value="Fastest">🚀 Fastest Route</mat-option>
+            <mat-option value="Eco">🌱 Eco-Friendly (Lowest Fuel)</mat-option>
+            <mat-option value="Cheapest">💰 Lowest Toll / Cost</mat-option>
+            <mat-option value="Avoid Toll">🛑 Avoid Tolls</mat-option>
+          </mat-select>
+          <mat-icon matPrefix class="prefix-icon">tune</mat-icon>
+        </mat-form-field>
+
+      </div>
+    </form>
+  </div>
+
+  <!-- Route Summary Grid -->
+  <div class="summary-grid">
+    <div class="metric-card card-distance">
+      <div class="metric-icon-wrap">
+        <span class="material-icons">straighten</span>
+      </div>
+      <div>
+        <p class="metric-label">Estimated Distance</p>
+        <h3 class="metric-value">{{ calculatedStats.distance }}</h3>
+      </div>
+    </div>
+
+    <div class="metric-card card-time">
+      <div class="metric-icon-wrap">
+        <span class="material-icons">schedule</span>
+      </div>
+      <div>
+        <p class="metric-label">Estimated Time</p>
+        <h3 class="metric-value">{{ calculatedStats.time }}</h3>
+      </div>
+    </div>
+
+    <div class="metric-card card-fuel">
+      <div class="metric-icon-wrap">
+        <span class="material-icons">local_gas_station</span>
+      </div>
+      <div>
+        <p class="metric-label">Fuel Required</p>
+        <h3 class="metric-value">{{ calculatedStats.fuel }}</h3>
+      </div>
+    </div>
+
+    <div class="metric-card card-cost">
+      <div class="metric-icon-wrap">
+        <span class="material-icons">payments</span>
+      </div>
+      <div>
+        <p class="metric-label">Estimated Cost</p>
+        <h3 class="metric-value">{{ calculatedStats.cost }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map Display Card -->
+  <div class="map-container-card glass-panel">
+    <div class="map-header">
+      <span class="material-icons map-header-icon">map</span>
+      <h2>Optimized Google Map Route</h2>
+    </div>
+    <div id="routeMap" class="google-map-view"></div>
+  </div>
+
+</div>

@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Fleet } from './fleet';
+import { LiveTracking } from './live-tracking';
 
-describe('Fleet', () => {
-  let component: Fleet;
-  let fixture: ComponentFixture<Fleet>;
+describe('LiveTracking', () => {
+  let component: LiveTracking;
+  let fixture: ComponentFixture<LiveTracking>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Fleet],
+      imports: [LiveTracking],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Fleet);
+    fixture = TestBed.createComponent(LiveTracking);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

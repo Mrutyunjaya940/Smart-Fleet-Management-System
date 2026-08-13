@@ -1,0 +1,88 @@
+<h2 mat-dialog-title class="dialog-title">
+  <span class="material-icons title-icon">local_shipping</span>
+  <span>{{ isEditMode ? 'Edit Vehicle Specs' : 'Add New Vehicle' }}</span>
+</h2>
+
+<mat-dialog-content class="dialog-content">
+
+  <div class="form-grid">
+
+    <!-- Vehicle Number -->
+    <mat-form-field appearance="outline" class="fw">
+      <mat-label>License Plate / Vehicle Number *</mat-label>
+      <input matInput [(ngModel)]="vehicle.vehicleNumber" placeholder="e.g. OD-02-AB-1234">
+      <mat-icon matSuffix>subtitles</mat-icon>
+    </mat-form-field>
+
+    <!-- Model Spec -->
+    <mat-form-field appearance="outline" class="fw">
+      <mat-label>Make &amp; Model Name</mat-label>
+      <input matInput [(ngModel)]="vehicle.modelName" placeholder="e.g. Tata Signa 2823">
+      <mat-icon matSuffix>directions_car</mat-icon>
+    </mat-form-field>
+
+    <!-- Category / Type -->
+    <mat-form-field appearance="outline" class="fw">
+      <mat-label>Vehicle Category *</mat-label>
+      <mat-select [(ngModel)]="vehicle.type">
+        <mat-option value="Heavy Truck">Heavy Cargo Truck</mat-option>
+        <mat-option value="Medium Truck">Medium Duty Truck</mat-option>
+        <mat-option value="Light Van">Light Delivery Van</mat-option>
+        <mat-option value="Electric Express">Electric Express Van</mat-option>
+        <mat-option value="Trailer">Heavy Duty Trailer</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Fuel Type -->
+    <mat-form-field appearance="outline" class="fw">
+      <mat-label>Fuel / Energy Type</mat-label>
+      <mat-select [(ngModel)]="vehicle.fuelType">
+        <mat-option value="Diesel">Diesel</mat-option>
+        <mat-option value="Petrol">Petrol</mat-option>
+        <mat-option value="Electric">Electric (EV)</mat-option>
+        <mat-option value="CNG">CNG</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Driver Name -->
+    <mat-form-field appearance="outline" class="fw">
+      <mat-label>Assigned Driver *</mat-label>
+      <input matInput [(ngModel)]="vehicle.driverName" placeholder="e.g. Rahul Kumar">
+      <mat-icon matSuffix>person</mat-icon>
+    </mat-form-field>
+
+    <!-- Payload Capacity -->
+    <mat-form-field appearance="outline" class="fw">
+      <mat-label>Payload Capacity *</mat-label>
+      <input matInput [(ngModel)]="vehicle.capacity" placeholder="e.g. 16 Tons / 2.5 Tons">
+      <mat-icon matSuffix>line_weight</mat-icon>
+    </mat-form-field>
+
+    <!-- Odometer -->
+    <mat-form-field appearance="outline" class="fw">
+      <mat-label>Current Odometer (km)</mat-label>
+      <input matInput type="number" [(ngModel)]="vehicle.currentOdometer" placeholder="e.g. 45200">
+      <mat-icon matSuffix>speed</mat-icon>
+    </mat-form-field>
+
+    <!-- Status -->
+    <mat-form-field appearance="outline" class="fw">
+      <mat-label>Fleet Status</mat-label>
+      <mat-select [(ngModel)]="vehicle.status">
+        <mat-option value="Active">Active (On Road)</mat-option>
+        <mat-option value="Available">Available (Parked)</mat-option>
+        <mat-option value="Maintenance">Maintenance (Servicing)</mat-option>
+        <mat-option value="Inactive">Inactive</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button (click)="close()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="save()">
+    <mat-icon>check</mat-icon> {{ isEditMode ? 'Update Specs' : 'Add Vehicle' }}
+  </button>
+</mat-dialog-actions>

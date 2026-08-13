@@ -1,0 +1,340 @@
+<div class="trip-container">
+
+  <!-- Header -->
+  <div class="trip-header">
+    <div>
+      <h2 class="page-title">🗺️ Trip Management &amp; Dispatch</h2>
+      <p class="page-subtitle">Schedule, track active dispatches, and monitor route completion progress</p>
+    </div>
+
+    <button
+      mat-raised-button
+      color="primary"
+      class="add-btn"
+      (click)="openScheduleModal()">
+      <mat-icon>add_road</mat-icon>
+      <span>Schedule New Trip</span>
+    </button>
+  </div>
+
+  <!-- Real-Time Computed Stats Cards -->
+  <div class="stats-container">
+
+    <div class="stat-card total" (click)="filterByStatus('All')">
+      <div class="card-icon">📦</div>
+      <div class="card-content">
+        <h2>{{ totalTrips }}</h2>
+        <p>Total Trips Logged</p>
+      </div>
+    </div>
+
+    <div class="stat-card active" (click)="filterByStatus('Active')">
+      <div class="card-icon">⚡</div>
+      <div class="card-content">
+        <h2>{{ activeTrips }}</h2>
+        <p>Active En Route</p>
+      </div>
+    </div>
+
+    <div class="stat-card scheduled" (click)="filterByStatus('Scheduled')">
+      <div class="card-icon">📅</div>
+      <div class="card-content">
+        <h2>{{ scheduledTrips }}</h2>
+        <p>Scheduled Dispatches</p>
+      </div>
+    </div>
+
+    <div class="stat-card completed" (click)="filterByStatus('Completed')">
+      <div class="card-icon">✅</div>
+      <div class="card-content">
+        <h2>{{ completedTrips }}</h2>
+        <p>Completed Successfully</p>
+      </div>
+    </div>
+
+    <div class="stat-card delayed" (click)="filterByStatus('Delayed')">
+      <div class="card-icon">⚠️</div>
+      <div class="card-content">
+        <h2>{{ delayedTrips }}</h2>
+        <p>Delayed / Traffic</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Search & Filter Bar -->
+  <div class="toolbar-card">
+
+    <div class="filter-pills">
+      <button class="pill-btn" [class.active]="activeFilter === 'All'" (click)="filterByStatus('All')">All Trips</button>
+      <button class="pill-btn" [class.active]="activeFilter === 'Active'" (click)="filterByStatus('Active')">Active</button>
+      <button class="pill-btn" [class.active]="activeFilter === 'Scheduled'" (click)="filterByStatus('Scheduled')">Scheduled</button>
+      <button class="pill-btn" [class.active]="activeFilter === 'Completed'" (click)="filterByStatus('Completed')">Completed</button>
+      <button class="pill-btn" [class.active]="activeFilter === 'Delayed'" (click)="filterByStatus('Delayed')">Delayed</button>
+    </div>
+
+    <mat-form-field appearance="outline" class="search-box">
+      <mat-label>Search Trips</mat-label>
+      <input
+        #input
+        matInput
+        placeholder="Search by trip ID, vehicle, driver, or route..."
+        (keyup)="applyFilter($event)">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+  </div>
+
+  <!-- Trips Grid -->
+  <div class="trips-grid">
+
+    @for (trip of filteredTrips; track trip.id) {
+      <div class="trip-card" (click)="viewTripDetails(trip)">
+
+        <!-- Card Header -->
+        <div class="card-top">
+          <div class="trip-id-wrap">
+            <span class="trip-id-badge">{{ trip.tripId }}</span>
+            <span
+              class="status-badge"
+              [ngClass]="{
+                'active': trip.status === 'Active',
+                'scheduled': trip.status === 'Scheduled',
+                'completed': trip.status === 'Completed',
+                'delayed': trip.status === 'Delayed'
+              }">
+              {{ trip.status }}
+            </span>
+          </div>
+          <span class="cargo-tag">{{ trip.cargoType || 'Standard Freight' }}</span>
+        </div>
+
+        <!-- Route Path -->
+        <div class="route-block">
+          <div class="route-title">
+            <span class="material-icons route-icon">alt_route</span>
+            <h3>{{ trip.route }}</h3>
+          </div>
+          <p class="route-full">{{ trip.source }} ➔ {{ trip.destination }}</p>
+        </div>
+
+        <!-- Progress Bar (For Active / Delayed / Completed) -->
+        <div class="progress-block">
+          <div class="progress-label-bar">
+            <span>Trip Completion</span>
+            <span class="progress-pct">{{ trip.progress }}%</span>
+          </div>
+          <mat-progress-bar
+            mode="determinate"
+            [value]="trip.progress"
+            [color]="trip.status === 'Delayed' ? 'warn' : 'primary'"
+            class="custom-progress">
+          </mat-progress-bar>
+        </div>
+
+        <!-- Details Info Grid -->
+        <div class="info-row">
+          <div class="info-item">
+            <span class="label"><span class="material-icons">local_shipping</span> Vehicle</span>
+            <span class="val">{{ trip.vehicle }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label"><span class="material-icons">person</span> Driver</span>
+            <span class="val">{{ trip.driver }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label"><span class="material-icons">straighten</span> Distance</span>
+            <span class="val">{{ trip.distance }} km</span>
+          </div>
+          <div class="info-item">
+            <span class="label"><span class="material-icons">schedule</span> ETA</span>
+            <span class="val highlight">{{ trip.eta }}</span>
+          </div>
+        </div>
+
+        <!-- Card Actions Footer -->
+        <div class="card-footer" (click)="$event.stopPropagation()">
+          <button mat-stroked-button color="primary" class="footer-btn" (click)="viewTripDetails(trip)">
+            <mat-icon>visibility</mat-icon> Details
+          </button>
+          <button mat-icon-button color="warn" title="Cancel / Delete Trip" (click)="deleteTrip(trip)">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </div>
+
+      </div>
+    }
+
+  </div>
+
+  <!-- Slide-Out Trip Details Drawer -->
+  @if (isDrawerOpen && selectedTrip) {
+    <div class="drawer-overlay" (click)="closeDrawer()"></div>
+    <aside class="trip-details-drawer">
+      <div class="drawer-header">
+        <div class="drawer-title-block">
+          <span class="trip-id-badge lg">{{ selectedTrip.tripId }}</span>
+          <div>
+            <h3>{{ selectedTrip.route }}</h3>
+            <p>{{ selectedTrip.cargoType }}</p>
+          </div>
+        </div>
+        <button class="close-btn" (click)="closeDrawer()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="drawer-body">
+
+        <!-- Progress Overview -->
+        <div class="drawer-card">
+          <div class="d-head">
+            <h4>Dispatch Status</h4>
+            <span class="status-badge" [class]="selectedTrip.status.toLowerCase()">{{ selectedTrip.status }}</span>
+          </div>
+          <div class="progress-block">
+            <div class="progress-label-bar">
+              <span>Overall Completion</span>
+              <strong>{{ selectedTrip.progress }}%</strong>
+            </div>
+            <mat-progress-bar mode="determinate" [value]="selectedTrip.progress" class="custom-progress"></mat-progress-bar>
+          </div>
+        </div>
+
+        <!-- Checkpoints & Waypoints -->
+        <div class="drawer-card">
+          <h4 class="card-subtitle"><span class="material-icons">location_on</span> Route Waypoints</h4>
+          <div class="timeline-nodes">
+            <div class="node-item completed">
+              <span class="dot"></span>
+              <div>
+                <h5>Origin: {{ selectedTrip.source }}</h5>
+                <p>Dispatched at {{ selectedTrip.startTime || '09:00 AM' }}</p>
+              </div>
+            </div>
+            <div class="node-item" [class.completed]="selectedTrip.progress >= 50" [class.active]="selectedTrip.progress > 0 && selectedTrip.progress < 100">
+              <span class="dot"></span>
+              <div>
+                <h5>Midway Telemetry Checkpoint</h5>
+                <p>Speed: {{ selectedTrip.speed }} km/h · Fuel Used: {{ selectedTrip.fuelConsumed || 2.1 }} L</p>
+              </div>
+            </div>
+            <div class="node-item" [class.completed]="selectedTrip.progress === 100">
+              <span class="dot"></span>
+              <div>
+                <h5>Destination: {{ selectedTrip.destination }}</h5>
+                <p>ETA: {{ selectedTrip.eta }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Telemetry Summary -->
+        <div class="drawer-card">
+          <h4 class="card-subtitle"><span class="material-icons">analytics</span> Telemetry Summary</h4>
+          <div class="spec-grid">
+            <div class="spec-item">
+              <span class="label">Assigned Vehicle</span>
+              <span class="val">{{ selectedTrip.vehicle }}</span>
+            </div>
+            <div class="spec-item">
+              <span class="label">Driver</span>
+              <span class="val">{{ selectedTrip.driver }}</span>
+            </div>
+            <div class="spec-item">
+              <span class="label">Total Distance</span>
+              <span class="val">{{ selectedTrip.distance }} km</span>
+            </div>
+            <div class="spec-item">
+              <span class="label">Fuel Consumed</span>
+              <span class="val">{{ selectedTrip.fuelConsumed || 2.1 }} Liters</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+  }
+
+  <!-- Schedule New Trip Modal -->
+  @if (isScheduleModalOpen) {
+    <div class="modal-overlay" (click)="closeScheduleModal()"></div>
+    <div class="schedule-modal glass-modal">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span class="material-icons title-icon">add_road</span>
+          Schedule New Dispatch Trip
+        </h3>
+        <button class="close-btn" (click)="closeScheduleModal()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form [formGroup]="tripForm" class="modal-form-grid">
+
+          <!-- Source -->
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Source Origin *</mat-label>
+            <mat-select formControlName="source">
+              @for (loc of locations; track loc) {
+                <mat-option [value]="loc">{{ loc }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Destination -->
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Destination *</mat-label>
+            <mat-select formControlName="destination">
+              @for (loc of locations; track loc) {
+                <mat-option [value]="loc">{{ loc }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Vehicle -->
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Vehicle *</mat-label>
+            <mat-select formControlName="vehicle">
+              @for (v of vehiclesList; track v) {
+                <mat-option [value]="v">{{ v }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Driver -->
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Driver *</mat-label>
+            <mat-select formControlName="driver">
+              @for (d of driversList; track d) {
+                <mat-option [value]="d">{{ d }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Cargo Type -->
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Cargo Freight Type</mat-label>
+            <input matInput formControlName="cargoType" placeholder="e.g. Electronics, Medical Supplies">
+          </mat-form-field>
+
+          <!-- Distance -->
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Est. Distance (km)</mat-label>
+            <input matInput type="number" formControlName="distance" placeholder="24.5">
+          </mat-form-field>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button mat-button (click)="closeScheduleModal()">Cancel</button>
+        <button mat-raised-button color="primary" [disabled]="tripForm.invalid" (click)="submitScheduleTrip()">
+          <mat-icon>check</mat-icon> Dispatch Trip
+        </button>
+      </div>
+    </div>
+  }
+
+</div>

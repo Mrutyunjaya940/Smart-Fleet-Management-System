@@ -1,1 +1,219 @@
-<p>settings works!</p>
+<div class="settings-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1>⚙️ System Settings &amp; Security</h1>
+      <p>Configure account preferences, user roles, permission matrices, and system telemetry</p>
+    </div>
+    
+    <button mat-raised-button color="primary" class="save-btn" (click)="save()">
+      <mat-icon>save</mat-icon>
+      Save Changes
+    </button>
+  </div>
+
+  <!-- Success Banner -->
+  @if (saved) {
+    <div class="success-banner">
+      <span class="material-icons">check_circle</span>
+      <span>Settings updated successfully!</span>
+    </div>
+  }
+
+  <!-- Multi-Tab Bar -->
+  <div class="settings-tabs-bar">
+    <button class="tab-btn" [class.active]="activeTab === 'profile'" (click)="setTab('profile')">
+      <span class="material-icons">person</span> Profile &amp; Account
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'users'" (click)="setTab('users')">
+      <span class="material-icons">manage_accounts</span> User Management
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'roles'" (click)="setTab('roles')">
+      <span class="material-icons">shield</span> Permissions Matrix
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'system'" (click)="setTab('system')">
+      <span class="material-icons">tune</span> System Preferences
+    </button>
+  </div>
+
+  <!-- TAB 1: PROFILE & ACCOUNT -->
+  @if (activeTab === 'profile') {
+    <div class="settings-card glass-panel">
+      <div class="card-title-row">
+        <h3><span class="material-icons">badge</span> Account &amp; Security Profile</h3>
+      </div>
+      
+      <div class="profile-layout">
+        <div class="avatar-block">
+          <div class="avatar-lg">A</div>
+          <button mat-stroked-button class="upload-btn">
+            <span class="material-icons">photo_camera</span> Change Photo
+          </button>
+        </div>
+
+        <div class="form-grid">
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Full Name</mat-label>
+            <input matInput [(ngModel)]="profile.name">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Email Address</mat-label>
+            <input matInput [(ngModel)]="profile.email">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Contact Phone</mat-label>
+            <input matInput [(ngModel)]="profile.phone">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="fw">
+            <mat-label>Organization / Company</mat-label>
+            <input matInput [(ngModel)]="profile.company">
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 2: USER MANAGEMENT -->
+  @if (activeTab === 'users') {
+    <div class="settings-card glass-panel">
+      <div class="card-title-row">
+        <h3><span class="material-icons">people</span> System Users &amp; Roles</h3>
+      </div>
+
+      <table mat-table [dataSource]="usersList" class="settings-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>User</th>
+          <td mat-cell *matCellDef="let u"><strong>{{ u.name }}</strong></td>
+        </ng-container>
+
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>Email</th>
+          <td mat-cell *matCellDef="let u">{{ u.email }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef>Assigned Role</th>
+          <td mat-cell *matCellDef="let u">
+            <span class="role-badge">{{ u.role }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let u">
+            <span class="status-chip active">{{ u.status }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let u">
+            <button mat-icon-button color="primary"><mat-icon>edit</mat-icon></button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedUserCols"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedUserCols;"></tr>
+      </table>
+    </div>
+  }
+
+  <!-- TAB 3: PERMISSIONS MATRIX -->
+  @if (activeTab === 'roles') {
+    <div class="settings-card glass-panel">
+      <div class="card-title-row">
+        <h3><span class="material-icons">security</span> Access Permissions Matrix</h3>
+      </div>
+
+      <table mat-table [dataSource]="permissionsMatrix" class="settings-table">
+        <ng-container matColumnDef="feature">
+          <th mat-header-cell *matHeaderCellDef>Feature Module</th>
+          <td mat-cell *matCellDef="let p"><strong>{{ p.feature }}</strong></td>
+        </ng-container>
+
+        <ng-container matColumnDef="admin">
+          <th mat-header-cell *matHeaderCellDef>Super Admin</th>
+          <td mat-cell *matCellDef="let p"><mat-slide-toggle [(ngModel)]="p.admin"></mat-slide-toggle></td>
+        </ng-container>
+
+        <ng-container matColumnDef="manager">
+          <th mat-header-cell *matHeaderCellDef>Fleet Manager</th>
+          <td mat-cell *matCellDef="let p"><mat-slide-toggle [(ngModel)]="p.manager"></mat-slide-toggle></td>
+        </ng-container>
+
+        <ng-container matColumnDef="dispatcher">
+          <th mat-header-cell *matHeaderCellDef>Dispatcher</th>
+          <td mat-cell *matCellDef="let p"><mat-slide-toggle [(ngModel)]="p.dispatcher"></mat-slide-toggle></td>
+        </ng-container>
+
+        <ng-container matColumnDef="driver">
+          <th mat-header-cell *matHeaderCellDef>Driver</th>
+          <td mat-cell *matCellDef="let p"><mat-slide-toggle [(ngModel)]="p.driver"></mat-slide-toggle></td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedPermCols"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedPermCols;"></tr>
+      </table>
+    </div>
+  }
+
+  <!-- TAB 4: SYSTEM PREFERENCES -->
+  @if (activeTab === 'system') {
+    <div class="settings-card glass-panel">
+      <div class="card-title-row">
+        <h3><span class="material-icons">tune</span> Telemetry &amp; System Preferences</h3>
+      </div>
+
+      <div class="form-grid">
+        <mat-form-field appearance="outline" class="fw">
+          <mat-label>Distance Measurement Unit</mat-label>
+          <mat-select [(ngModel)]="preferences.distanceUnit">
+            <mat-option value="Kilometers (km)">Kilometers (km)</mat-option>
+            <mat-option value="Miles (mi)">Miles (mi)</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="fw">
+          <mat-label>Fuel Volume Unit</mat-label>
+          <mat-select [(ngModel)]="preferences.fuelUnit">
+            <mat-option value="Liters (L)">Liters (L)</mat-option>
+            <mat-option value="Gallons (gal)">Gallons (gal)</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="fw">
+          <mat-label>Speed Limit Warning (km/h)</mat-label>
+          <input matInput type="number" [(ngModel)]="preferences.speedLimitAlert">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="fw">
+          <mat-label>Low Fuel Alert Threshold (%)</mat-label>
+          <input matInput type="number" [(ngModel)]="preferences.lowFuelThreshold">
+        </mat-form-field>
+      </div>
+
+      <div class="toggle-list">
+        <div class="toggle-item">
+          <div>
+            <h4>Low Fuel Warnings</h4>
+            <p>Notify dispatcher when vehicle tank drops below threshold</p>
+          </div>
+          <mat-slide-toggle [(ngModel)]="notifications.lowFuel"></mat-slide-toggle>
+        </div>
+
+        <div class="toggle-item">
+          <div>
+            <h4>Route Deviation Alerts</h4>
+            <p>Trigger alert if vehicle strays from calculated Google Maps path</p>
+          </div>
+          <mat-slide-toggle [(ngModel)]="notifications.routeDeviation"></mat-slide-toggle>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>
