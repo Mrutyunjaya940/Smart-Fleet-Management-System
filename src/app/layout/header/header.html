@@ -22,8 +22,17 @@
     </div>
   </div>
 
-  <!-- Right Section: Search, Notifications, Theme, Profile -->
+  <!-- Right Section: Search, Voice Assistant, Notifications, Theme, Profile -->
   <div class="right-section">
+
+    <!-- Voice AI Assistant Button -->
+    <button
+      class="icon-btn voice-btn"
+      [class.listening]="isListening"
+      (click)="toggleVoiceControl()"
+      title="Voice AI Assistant (Click to speak)">
+      <span class="material-icons">{{ isListening ? 'mic' : 'mic_none' }}</span>
+    </button>
 
     <!-- Search Box -->
     <div class="search-container">
@@ -65,6 +74,14 @@
     </div>
 
   </div>
+
+  <!-- Voice AI Speech Toast Feedback -->
+  @if (voiceFeedback) {
+    <div class="voice-toast-banner">
+      <span class="material-icons">record_voice_over</span>
+      <span>{{ voiceFeedback }}</span>
+    </div>
+  }
 
   <!-- Profile Dropdown Popup Menu -->
   @if (layoutService.isProfileMenuOpen()) {

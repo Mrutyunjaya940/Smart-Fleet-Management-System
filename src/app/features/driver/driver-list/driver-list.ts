@@ -8,9 +8,19 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCardModule } from '@angular/material/card';
 
 import { Driver } from '../../../models/driver.model';
 import { AddDriverDialog } from '../add-driver-dialog/add-driver-dialog';
+
+interface TelemetryEvent {
+  driverName: string;
+  eventType: 'Harsh Braking' | 'Over-Speeding' | 'Idle Engine' | 'Geofence Breach';
+  impactScore: number;
+  time: string;
+  location: string;
+  vehicle: string;
+}
 
 @Component({
   selector: 'app-driver-list',
@@ -23,7 +33,8 @@ import { AddDriverDialog } from '../add-driver-dialog/add-driver-dialog';
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    MatSelectModule
+    MatSelectModule,
+    MatCardModule
   ],
   templateUrl: './driver-list.html',
   styleUrls: ['./driver-list.css']
@@ -44,6 +55,20 @@ export class DriverList implements OnInit {
   selectedDriver: Driver | null = null;
   isDrawerOpen = false;
   activeFilter = 'All';
+
+  // Gamified Leaderboard Badges
+  leaderboardBadges = [
+    { rank: 1, driver: 'Rahul Kumar', score: 98, badge: '🏆 Eco Driver of the Month', trips: 342, stars: 5 },
+    { rank: 2, driver: 'Suresh Nayak', score: 97, badge: '🛡️ Zero Violations', trips: 210, stars: 5 },
+    { rank: 3, driver: 'Amit Das', score: 95, badge: '⚡ Smooth Operator', trips: 512, stars: 4.5 }
+  ];
+
+  // Telemetry Event Logs
+  telemetryEvents: TelemetryEvent[] = [
+    { driverName: 'Prakash Rout', eventType: 'Over-Speeding', impactScore: -10, time: '10:14 AM', location: 'NH-16 Expressway (88 km/h)', vehicle: 'OD-10-EF-9012' },
+    { driverName: 'Amit Das', eventType: 'Harsh Braking', impactScore: -5, time: '09:42 AM', location: 'Rasulgarh Flyover', vehicle: 'OD-05-CD-5678' },
+    { driverName: 'Rahul Kumar', eventType: 'Idle Engine', impactScore: -3, time: '08:15 AM', location: 'Master Canteen Loading Bay', vehicle: 'OD-02-AB-1234' }
+  ];
 
   mockDrivers: Driver[] = [
     {

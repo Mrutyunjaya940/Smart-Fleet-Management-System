@@ -1,0 +1,96 @@
+<!-- Floating AI Copilot Trigger Button -->
+<button
+  class="ai-fab-btn"
+  [class.active-fab]="isOpen"
+  (click)="toggleCopilot()"
+  title="AI Fleet Copilot Assistant">
+  <span class="material-icons">{{ isOpen ? 'close' : 'psychology' }}</span>
+  @if (!isOpen) {
+    <span class="fab-pulse"></span>
+  }
+</button>
+
+<!-- AI Copilot Popup Drawer -->
+@if (isOpen) {
+  <div class="ai-drawer-card">
+    
+    <!-- Drawer Header -->
+    <div class="copilot-header">
+      <div class="header-left">
+        <div class="ai-avatar-box">
+          <span class="material-icons">psychology</span>
+        </div>
+        <div>
+          <h3>Smart Fleet AI Copilot</h3>
+          <span class="online-indicator">🟢 AI Neural Engine Active</span>
+        </div>
+      </div>
+
+      <button class="close-icon-btn" (click)="toggleCopilot()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <!-- Messages Chat Container -->
+    <div id="chatContainer" class="chat-body">
+      @for (msg of messages; track $index) {
+        <div class="msg-row" [class.user-msg]="msg.sender === 'user'" [class.ai-msg]="msg.sender === 'ai'">
+          
+          @if (msg.sender === 'ai') {
+            <div class="msg-avatar">
+              <span class="material-icons">psychology</span>
+            </div>
+          }
+
+          <div class="msg-bubble">
+            <p class="msg-text">{{ msg.text }}</p>
+            <span class="msg-time">{{ msg.timestamp }}</span>
+
+            <!-- AI Prompt Suggestion Chips -->
+            @if (msg.suggestions && msg.suggestions.length > 0) {
+              <div class="suggestions-grid">
+                @for (sug of msg.suggestions; track sug) {
+                  <button class="sug-chip" (click)="sendMessage(sug)">
+                    {{ sug }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+        </div>
+      }
+
+      @if (isThinking) {
+        <div class="msg-row ai-msg">
+          <div class="msg-avatar">
+            <span class="material-icons">psychology</span>
+          </div>
+          <div class="msg-bubble thinking-bubble">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Input Bar -->
+    <div class="chat-input-bar">
+      <input
+        type="text"
+        [(ngModel)]="userInput"
+        (keyup.enter)="sendMessage()"
+        placeholder="Ask AI Copilot (e.g., 'Who is the top driver?')..."
+        class="input-field" />
+      
+      <button
+        class="send-btn"
+        [disabled]="!userInput.trim()"
+        (click)="sendMessage()">
+        <span class="material-icons">send</span>
+      </button>
+    </div>
+
+  </div>
+}

@@ -1,0 +1,135 @@
+<div class="driver-portal-container">
+  
+  <!-- Mobile Header Bar -->
+  <div class="portal-header">
+    <div class="driver-profile">
+      <div class="avatar-circle">RK</div>
+      <div>
+        <h1>Welcome, {{ driverName }} 👋</h1>
+        <p>Assigned: <b>{{ driverVehicle }}</b></p>
+      </div>
+    </div>
+
+    <div class="rating-badge">
+      <span class="star-icon">⭐</span>
+      <span class="rating-val">{{ safetyRating }} / 5.0</span>
+    </div>
+  </div>
+
+  <!-- Active Trip Card -->
+  <mat-card class="trip-card">
+    <div class="card-status-bar">
+      <span class="trip-id-badge">{{ activeTrip.tripId }}</span>
+      <span class="status-pill" [class.completed]="activeTrip.status === 'Completed'">{{ activeTrip.status }}</span>
+    </div>
+
+    <div class="trip-route-timeline">
+      <div class="route-point">
+        <span class="material-icons green-text">location_on</span>
+        <div>
+          <span class="point-lbl">Origin</span>
+          <h3 class="point-val">{{ activeTrip.source }}</h3>
+        </div>
+      </div>
+
+      <div class="timeline-line"></div>
+
+      <div class="route-point">
+        <span class="material-icons red-text">flag</span>
+        <div>
+          <span class="point-lbl">Destination</span>
+          <h3 class="point-val">{{ activeTrip.destination }}</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Waypoint Stop Checklist -->
+    <div class="waypoints-box">
+      <h4>Turn-by-Turn Waypoints</h4>
+      <ul>
+        @for (wp of activeTrip.waypoints; track wp) {
+          <li>
+            <span class="material-icons check-icon">check_circle</span>
+            <span>{{ wp }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <!-- Trip Action Button -->
+    <div class="trip-footer">
+      @if (activeTrip.status === 'Completed') {
+        <div class="completed-msg">
+          <span class="material-icons check-icon">task_alt</span>
+          <span>Trip Completed &amp; Proof of Delivery Uploaded!</span>
+        </div>
+      } @else {
+        <button mat-raised-button color="primary" class="pod-btn" (click)="openPodModal()">
+          <span class="material-icons">draw</span>
+          Complete Trip &amp; Digital POD (Proof of Delivery)
+        </button>
+      }
+    </div>
+  </mat-card>
+
+  <!-- DIGITAL PROOF OF DELIVERY (POD) MODAL -->
+  @if (isPodModalOpen) {
+    <div class="modal-overlay" (click)="closePodModal()"></div>
+    <div class="pod-modal">
+      <div class="modal-header">
+        <div>
+          <h2>Digital Proof of Delivery (POD)</h2>
+          <p>Capture customer signature and delivery parcel photo</p>
+        </div>
+        <button class="close-btn" (click)="closePodModal()"><span class="material-icons">close</span></button>
+      </div>
+
+      @if (deliveryConfirmed) {
+        <div class="success-banner">
+          <span class="material-icons check-lg">check_circle</span>
+          <h3>Delivery Successfully Verified &amp; Saved!</h3>
+        </div>
+      } @else {
+        <div class="pod-form">
+          <!-- Signature Canvas Pad -->
+          <div class="sig-box" (click)="signCanvas()">
+            <label>Customer Digital Signature Pad</label>
+            <div class="canvas-area" [class.signed]="isSigned">
+              @if (isSigned) {
+                <span class="signed-text">✍️ Customer Signature Verified</span>
+              } @else {
+                <span class="material-icons icon-draw">gesture</span>
+                <p>Click/Draw Customer Signature here</p>
+              }
+            </div>
+          </div>
+
+          <!-- Photo Upload Preview -->
+          <div class="photo-box" (click)="uploadPhoto()">
+            <label>Delivery Confirmation Photo</label>
+            <div class="upload-area" [class.uploaded]="photoUploaded">
+              @if (photoUploaded) {
+                <span class="photo-text">📷 Delivery Parcel Photo Uploaded</span>
+              } @else {
+                <span class="material-icons icon-camera">photo_camera</span>
+                <p>Click to capture or upload Parcel Photo</p>
+              }
+            </div>
+          </div>
+
+          <button
+            mat-raised-button
+            color="primary"
+            class="confirm-pod-btn"
+            [disabled]="!isSigned || !photoUploaded"
+            (click)="confirmDelivery()">
+            <span class="material-icons">task_alt</span>
+            Confirm Delivery &amp; Save POD
+          </button>
+        </div>
+      }
+
+    </div>
+  }
+
+</div>

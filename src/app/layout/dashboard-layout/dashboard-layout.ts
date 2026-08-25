@@ -4,6 +4,7 @@ import { Sidebar } from '../sidebar/sidebar';
 import { Footer } from '../footer/footer';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AiCopilot } from '../../features/ai-copilot/ai-copilot';
 
 @Component({
   selector: 'app-dashboard-layout',
@@ -13,7 +14,8 @@ import { CommonModule } from '@angular/common';
     Header,
     Sidebar,
     Footer,
-    RouterOutlet
+    RouterOutlet,
+    AiCopilot
   ],
   templateUrl: './dashboard-layout.html',
   styleUrl: './dashboard-layout.css'

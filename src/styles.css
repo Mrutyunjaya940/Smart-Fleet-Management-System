@@ -1,31 +1,37 @@
 @import "@angular/material/prebuilt-themes/azure-blue.css";
 
 /* ==============================
-   CSS CUSTOM PROPERTIES
+   DEEP COBALT BLUE THEME
 ============================== */
 :root {
   --color-primary:    #2563eb;
-  --color-success:    #16a34a;
-  --color-warning:    #d97706;
-  --color-danger:     #dc2626;
-  --color-purple:     #7c3aed;
-  --bg-main:          #f1f5f9;
-  --bg-card:          #ffffff;
-  --text-primary:     #0f172a;
-  --text-secondary:   #64748b;
-  --border-color:     #e2e8f0;
-  --shadow-sm:        0 1px 3px rgba(0,0,0,.08);
-  --shadow-md:        0 4px 20px rgba(0,0,0,.08);
-  --shadow-lg:        0 8px 32px rgba(0,0,0,.12);
-  --radius-sm:        8px;
-  --radius-md:        12px;
-  --radius-lg:        16px;
-  --transition:       .2s ease;
+  --color-primary-glow: rgba(37, 99, 235, 0.4);
+  --color-success:    #10b981;
+  --color-success-glow: rgba(16, 185, 129, 0.35);
+  --color-warning:    #f59e0b;
+  --color-danger:     #ef4444;
+  --color-purple:     #8b5cf6;
+
+  /* Global Project Background: Matching Auth Blue Gradient */
+  --bg-main:          #090d16;
+  --bg-card:          rgba(17, 24, 39, 0.85);
+  --text-primary:     #f8fafc;
+  --text-secondary:   #94a3b8;
+  --border-color:     rgba(255, 255, 255, 0.12);
+  --glass-bg:         rgba(17, 24, 39, 0.85);
+  --glass-border:     rgba(255, 255, 255, 0.12);
+
+  --shadow-sm:        0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md:        0 10px 30px rgba(0, 0, 0, 0.3);
+  --shadow-lg:        0 20px 50px rgba(0, 0, 0, 0.4);
+  --radius-sm:        10px;
+  --radius-md:        16px;
+  --radius-lg:        24px;
+  --transition-fast:  0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ==============================
-   RESET
-============================== */
+/* RESET */
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -34,36 +40,36 @@
 
 html, body {
   height: 100%;
-  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--bg-main);
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-main) linear-gradient(135deg, #030712 0%, #0f172a 50%, #1e1b4b 100%) fixed;
   color: var(--text-primary);
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
 }
 
 body {
   overflow-x: hidden;
 }
 
-/* Custom scrollbar */
+/* CUSTOM SCROLLBAR */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #475569; }
 
 button, input, select, textarea {
   font-family: inherit;
 }
 
-a { color: inherit; }
+a { color: inherit; text-decoration: none; }
 
-/* ==============================
-   LAYOUT
-============================== */
+/* LAYOUT */
 .layout {
   display: flex;
   height: 100vh;
   overflow: hidden;
+  background: transparent;
 }
 
 .main-container {
@@ -76,81 +82,167 @@ a { color: inherit; }
 .content {
   flex: 1;
   overflow-y: auto;
-  background: var(--bg-main);
+  background: transparent;
 }
 
-/* ==============================
-   DARK THEME
-============================== */
-body.dark-theme {
-  --bg-main:        #0f172a;
-  --bg-card:        #1e293b;
-  --text-primary:   #f1f5f9;
-  --text-secondary: #94a3b8;
-  --border-color:   rgba(255,255,255,.08);
-  background: var(--bg-main);
-  color: var(--text-primary);
+.header {
+  background: rgba(17, 24, 39, 0.9) !important;
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: white !important;
 }
 
-body.dark-theme .content { background: #0f172a; }
-
-body.dark-theme .header {
-  background: #1e293b;
-  box-shadow: 0 1px 0 rgba(255,255,255,.06);
+.sidebar {
+  background: linear-gradient(180deg, #030712 0%, #0b0f19 100%) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
 }
 
-body.dark-theme .search-box {
-  background: #334155;
-  color: white;
+/* GLASSMORPHISM & ELEVATION CLASSES */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-smooth);
 }
 
-body.dark-theme .search-box::placeholder { color: #64748b; }
-
-body.dark-theme .icon-btn {
-  background: #334155;
-  color: white;
+.glass-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
 }
 
-body.dark-theme .icon-btn:hover { background: #2563eb; }
-
-body.dark-theme .left-section h2 { color: #60a5fa; }
-
-body.dark-theme .sidebar {
-  background: linear-gradient(180deg, #020617 0%, #0f172a 100%);
-  color: white;
+.hover-glow:hover {
+  box-shadow: 0 10px 30px var(--color-primary-glow);
 }
 
-body.dark-theme .stat-card {
-  box-shadow: 0 8px 25px rgba(0,0,0,.45);
-}
-
-body.dark-theme table { background: #1e293b; }
-body.dark-theme .mat-mdc-header-row { background: #334155; }
-body.dark-theme .mat-mdc-cell { color: #e2e8f0; }
-body.dark-theme .mat-mdc-header-cell { color: #94a3b8; }
-
-body.dark-theme .profile span { color: white; }
-
-/* Material overrides for dark mode */
-body.dark-theme .mat-mdc-form-field {
-  --mdc-filled-text-field-container-color: #334155;
-  --mdc-filled-text-field-input-text-color: #f1f5f9;
-}
-
-/* ==============================
-   UTILITY CLASSES
-============================== */
-.text-primary   { color: var(--color-primary); }
-.text-success   { color: var(--color-success); }
-.text-warning   { color: var(--color-warning); }
-.text-danger    { color: var(--color-danger); }
-
+/* BADGES & CHIPS */
 .badge {
-  display: inline-flex; align-items: center;
-  padding: 4px 10px; border-radius: 999px;
-  font-size: 0.75rem; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 999px;
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.02em;
 }
-.badge-success { background: #ecfdf5; color: #15803d; }
-.badge-warning { background: #fffbeb; color: #d97706; }
-.badge-danger  { background: #fef2f2; color: #dc2626; }
-.badge-info    { background: #eff6ff; color: #2563eb; }
+.badge-success { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.badge-warning { background: rgba(245, 158, 11, 0.15); color: #d97706; }
+.badge-danger  { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.badge-info    { background: rgba(37, 99, 235, 0.15); color: #2563eb; }
+
+/* ANGULAR MATERIAL OVERRIDES */
+.mat-mdc-card {
+  background: var(--glass-bg) !important;
+  color: white !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-md) !important;
+  border: 1px solid var(--border-color) !important;
+  transition: all var(--transition-smooth) !important;
+}
+
+.mat-mdc-button-base {
+  border-radius: var(--radius-sm) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* =========================================
+   ANGULAR MATERIAL GLOBAL DARK GLASS OVERRIDES
+========================================= */
+
+/* 1. Form Fields, Inputs & Labels */
+.mat-mdc-form-field {
+  --mdc-filled-text-field-container-color: rgba(30, 41, 59, 0.6) !important;
+  --mdc-outlined-text-field-container-color: rgba(30, 41, 59, 0.6) !important;
+  --mdc-outlined-text-field-input-text-color: #ffffff !important;
+  --mdc-outlined-text-field-label-text-color: #94a3b8 !important;
+  --mdc-outlined-text-field-hover-label-text-color: #60a5fa !important;
+  --mdc-outlined-text-field-focus-label-text-color: #60a5fa !important;
+  --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.15) !important;
+  --mdc-outlined-text-field-hover-outline-color: #3b82f6 !important;
+  --mdc-outlined-text-field-focus-outline-color: #3b82f6 !important;
+  width: 100%;
+}
+
+.mat-mdc-input-element, input.mat-mdc-input-element, textarea.mat-mdc-input-element {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.mat-mdc-input-element::placeholder {
+  color: #64748b !important;
+}
+
+.mat-mdc-form-field label, .mat-mdc-floating-label {
+  color: #94a3b8 !important;
+}
+
+.mdc-text-field--focused .mat-mdc-floating-label {
+  color: #60a5fa !important;
+}
+
+.mat-mdc-select-value, .mat-mdc-select-value-text, .mat-mdc-select-arrow {
+  color: #ffffff !important;
+}
+
+.mat-mdc-select-panel {
+  background: #0f172a !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.mat-mdc-option {
+  color: #f1f5f9 !important;
+}
+
+.mat-mdc-option:hover, .mat-mdc-option.mdc-list-item--selected {
+  background: rgba(37, 99, 235, 0.2) !important;
+}
+
+/* 2. Tables & Header Cells */
+.mat-mdc-table {
+  background: transparent !important;
+  color: white !important;
+}
+
+.mat-mdc-header-row {
+  background: rgba(30, 41, 59, 0.95) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.mat-mdc-header-cell {
+  color: #94a3b8 !important;
+  font-weight: 800 !important;
+  font-size: 0.8rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.mat-mdc-row {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  transition: background 0.2s ease !important;
+}
+
+.mat-mdc-row:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.mat-mdc-cell {
+  color: #ffffff !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 3. Paginator */
+.mat-mdc-paginator {
+  background: transparent !important;
+  color: #94a3b8 !important;
+}
+
+.mat-mdc-paginator-range-label, .mat-mdc-paginator-page-size-label {
+  color: #94a3b8 !important;
+}
+
+.mat-mdc-paginator-icon {
+  fill: #94a3b8 !important;
+}

@@ -1,159 +1,271 @@
 <div class="tracking-container">
-
-  <!-- Header & Mode Switcher -->
+  
+  <!-- Header Bar -->
   <div class="page-header">
-    <div>
-      <h2>📍 GPS Tracking &amp; Route Playback</h2>
-      <p>Monitor live vehicle positions or replay historical trip routes</p>
+    <div class="header-title">
+      <div class="icon-badge">
+        <span class="material-icons">location_on</span>
+      </div>
+      <div>
+        <h1>Real-Time Live GPS, Cold Chain &amp; Kafka Telemetry</h1>
+        <p>Microservice pipeline: GPS Ping → Gateway → Kafka ('driver-telemetry-raw') → Redis GEO → PostGIS ST_DWithin &amp; STOMP WebSocket</p>
+      </div>
     </div>
 
-    <!-- Mode Switcher -->
-    <div class="mode-tabs">
-      <button class="tab-btn" [class.active]="activeTab === 'live'" (click)="switchTab('live')">
-        <span class="material-icons">my_location</span>
-        Live Tracking
+    <!-- Mode Switcher Tabs & Trigger -->
+    <div class="header-actions">
+      <button mat-stroked-button color="accent" (click)="simulateRouteDeviationPing()">
+        <span class="material-icons">ALT_ROUTE</span>
+        Simulate Kafka Off-Path Ping (>200m)
       </button>
-      <button class="tab-btn" [class.active]="activeTab === 'playback'" (click)="switchTab('playback')">
-        <span class="material-icons">history</span>
-        Route Playback
-      </button>
+
+      <div class="tab-switcher">
+        <button
+          class="tab-btn"
+          [class.active]="activeTab === 'live'"
+          (click)="switchTab('live')">
+          <span class="material-icons">sensors</span>
+          Live GPS Feed
+        </button>
+        <button
+          class="tab-btn"
+          [class.active]="activeTab === 'playback'"
+          (click)="switchTab('playback')">
+          <span class="material-icons">history</span>
+          Route History Playback
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- LIVE TRACKING MODE -->
-  @if (activeTab === 'live') {
-    <div class="stats-grid">
-      <div class="stat-card blue">
-        <h2>{{ vehicles.length }}</h2>
-        <p>Total Vehicles</p>
-      </div>
-      <div class="stat-card green">
-        <h2>{{ movingCount }}</h2>
-        <p>Moving</p>
-      </div>
-      <div class="stat-card orange">
-        <h2>{{ idleCount }}</h2>
-        <p>Idle</p>
-      </div>
-      <div class="stat-card red">
-        <h2>{{ offlineCount }}</h2>
-        <p>Offline</p>
-      </div>
+  <!-- Route Deviation Alert Toast -->
+  @if (routeDeviationToast) {
+    <div class="deviation-alert-banner">
+      <span class="material-icons">warning</span>
+      <span>{{ routeDeviationToast }}</span>
     </div>
   }
 
-  <!-- ROUTE PLAYBACK CONTROL PANEL -->
-  @if (activeTab === 'playback') {
-    <div class="playback-panel glass-card">
-      
-      <div class="playback-header">
-        <div class="vehicle-select-wrap">
-          <span class="material-icons select-icon">directions_car</span>
-          <select class="custom-select" [(ngModel)]="selectedPlaybackVehicle" (change)="setupPlaybackMode()">
-            <option value="OD-02-AB-1234">OD-02-AB-1234 (Bhubaneswar → Cuttack)</option>
-            <option value="OD-05-CD-5678">OD-05-CD-5678 (Bhubaneswar → Puri)</option>
-            <option value="OD-10-EF-9012">OD-10-EF-9012 (Airport Express)</option>
-          </select>
-        </div>
-
-        <div class="speed-controls">
-          <span class="speed-label">Speed:</span>
-          <button class="speed-btn" [class.active]="playbackSpeed === 1" (click)="setPlaybackSpeed(1)">1x</button>
-          <button class="speed-btn" [class.active]="playbackSpeed === 2" (click)="setPlaybackSpeed(2)">2x</button>
-          <button class="speed-btn" [class.active]="playbackSpeed === 4" (click)="setPlaybackSpeed(4)">4x</button>
-        </div>
-      </div>
-
-      <!-- Playback Timeline Controls -->
-      <div class="timeline-controls">
-        <button class="play-btn" (click)="togglePlayPause()">
-          <span class="material-icons">{{ isPlaying ? 'pause' : 'play_arrow' }}</span>
-        </button>
-
-        <div class="slider-wrap">
-          <input
-            type="range"
-            min="0"
-            [max]="playbackWaypoints.length - 1"
-            [value]="playbackIndex"
-            (input)="onSliderChange($event)"
-            class="playback-range-slider" />
-          
-          <div class="time-ticks">
-            <span>{{ playbackWaypoints[0].time }}</span>
-            <span>{{ currentWaypoint.time }} ({{ currentWaypoint.locationName }})</span>
-            <span>{{ playbackWaypoints[playbackWaypoints.length - 1].time }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Live Replay Telemetry Overlay -->
-      <div class="telemetry-bar">
-        <div class="t-item">
-          <span class="label">Time</span>
-          <span class="val">{{ currentWaypoint.time }}</span>
-        </div>
-        <div class="t-item">
-          <span class="label">Current Location</span>
-          <span class="val highlight">{{ currentWaypoint.locationName }}</span>
-        </div>
-        <div class="t-item">
-          <span class="label">Replay Speed</span>
-          <span class="val">{{ currentWaypoint.speed }} km/h</span>
-        </div>
-      </div>
-
+  <!-- Temperature Alert Banner -->
+  @if (coldChainCargo.tempAlert) {
+    <div class="temp-alert-banner">
+      <span class="material-icons">ac_unit</span>
+      <span>{{ coldChainCargo.tempAlert }}</span>
     </div>
   }
 
-  <!-- Main Map & Fleet List Content -->
-  <div class="tracking-content" [class.playback-layout]="activeTab === 'playback'">
+  <!-- Main Grid Layout -->
+  <div class="tracking-grid">
+    
+    <!-- Left Sidebar Panel -->
+    <div class="left-panel">
 
-    <!-- Map Section -->
-    <div class="map-card">
-      <div class="card-header">
-        <h3>
-          <span class="material-icons header-icon">map</span>
-          {{ activeTab === 'live' ? 'Live Fleet Google Map' : 'Historical Trip Playback' }}
-        </h3>
-      </div>
-      <div id="map"></div>
+      <!-- Live GPS Mode Left Panel -->
+      @if (activeTab === 'live') {
+        
+        <!-- Summary KPI Cards -->
+        <div class="kpi-mini-grid">
+          <div class="kpi-mini-card moving">
+            <span class="kpi-num">{{ movingCount }}</span>
+            <span class="kpi-lbl">Moving</span>
+          </div>
+
+          <div class="kpi-mini-card idle">
+            <span class="kpi-num">{{ idleCount }}</span>
+            <span class="kpi-lbl">Idle</span>
+          </div>
+
+          <div class="kpi-mini-card offline">
+            <span class="kpi-num">{{ offlineCount }}</span>
+            <span class="kpi-lbl">Offline</span>
+          </div>
+        </div>
+
+        <!-- Vehicle List Cards -->
+        <div class="vehicle-list">
+          @for (vehicle of vehicles; track vehicle.id; let i = $index) {
+            <div
+              class="vehicle-card"
+              [class.selected]="selectedVehicle?.id === vehicle.id"
+              (click)="focusVehicle(vehicle, i)">
+              
+              <div class="card-header">
+                <span class="v-number">{{ vehicle.vehicleNumber }}</span>
+                <span class="v-status" [class]="vehicle.status.toLowerCase()">{{ vehicle.status }}</span>
+              </div>
+
+              <div class="card-body">
+                <div class="info-item">
+                  <span class="material-icons icon-sm">person</span>
+                  <span>{{ vehicle.driver }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="material-icons icon-sm">speed</span>
+                  <span>{{ vehicle.speed }} km/h</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- COLD CHAIN CARGO IOT TELEMETRY WIDGET -->
+        <mat-card class="panel-widget cold-chain-widget">
+          <div class="widget-header">
+            <span class="material-icons blue-icon">ac_unit</span>
+            <div>
+              <h3>Cold Chain IoT Cargo Sensor</h3>
+              <p>{{ coldChainCargo.cargoType }}</p>
+            </div>
+          </div>
+
+          <div class="temp-gauge-box">
+            <div class="temp-val-display" [class.alert-temp]="coldChainCargo.temperature > 4">
+              {{ coldChainCargo.temperature }}°C
+            </div>
+            <div class="temp-details">
+              <p>Target Range: <b>{{ coldChainCargo.targetRange }}</b></p>
+              <p>Humidity: <b>{{ coldChainCargo.humidity }}</b> · Door: <b>{{ coldChainCargo.doorStatus }}</b></p>
+            </div>
+          </div>
+
+          <button mat-stroked-button color="warn" class="sim-temp-btn" (click)="simulateColdChainBreach()">
+            <span class="material-icons">thermostat</span>
+            Simulate Temp Spike Alert
+          </button>
+        </mat-card>
+
+        <!-- EV BATTERY & CHARGING PINS WIDGET -->
+        <mat-card class="panel-widget ev-widget">
+          <div class="widget-header">
+            <span class="material-icons purple-icon">bolt</span>
+            <div>
+              <h3>EV Fleet Battery &amp; Fast Chargers</h3>
+              <p>{{ evFleetStatus.vehicle }}</p>
+            </div>
+          </div>
+
+          <div class="ev-stats-row">
+            <div class="ev-stat-box">
+              <span class="ev-val green-text">{{ evFleetStatus.soc }}%</span>
+              <span class="ev-lbl">Battery SOC</span>
+            </div>
+            <div class="ev-stat-box">
+              <span class="ev-val">{{ evFleetStatus.batteryHealth }}%</span>
+              <span class="ev-lbl">Health SOH</span>
+            </div>
+            <div class="ev-stat-box">
+              <span class="ev-val purple-text">{{ evFleetStatus.estRangeKm }} km</span>
+              <span class="ev-lbl">Est. Range</span>
+            </div>
+          </div>
+        </mat-card>
+
+        <!-- FASTag TOLL CALCULATOR WIDGET -->
+        <mat-card class="panel-widget toll-widget">
+          <div class="widget-header">
+            <span class="material-icons green-icon">account_balance_wallet</span>
+            <div>
+              <h3>FASTag Toll Wallet &amp; Route Tolls</h3>
+              <p>Balance: <b>₹{{ fastagToll.walletBalance | number }}</b></p>
+            </div>
+          </div>
+
+          <div class="toll-list">
+            @for (t of fastagToll.upcomingTolls; track t.plaza) {
+              <div class="toll-item">
+                <div>
+                  <h4>{{ t.plaza }}</h4>
+                  <p>{{ t.distance }}</p>
+                </div>
+                <span class="toll-cost">₹{{ t.cost }}</span>
+              </div>
+            }
+          </div>
+        </mat-card>
+
+      } @else {
+
+        <!-- Route History Playback Control Panel -->
+        <div class="playback-panel">
+          <div class="panel-title">
+            <span class="material-icons">history</span>
+            <h3>Playback Controls</h3>
+          </div>
+
+          <div class="field-group">
+            <label>Select Vehicle</label>
+            <mat-select [(value)]="selectedPlaybackVehicle" class="playback-select">
+              <mat-option value="OD-02-AB-1234">OD-02-AB-1234 (Rahul Kumar)</mat-option>
+              <mat-option value="OD-05-CD-5678">OD-05-CD-5678 (Amit Das)</mat-option>
+            </mat-select>
+          </div>
+
+          <!-- Current Waypoint Telemetry Card -->
+          <div class="telemetry-card">
+            <div class="telemetry-item">
+              <span class="material-icons icon-blue">schedule</span>
+              <div>
+                <span class="t-label">Timestamp</span>
+                <span class="t-val">{{ currentWaypoint.time }}</span>
+              </div>
+            </div>
+
+            <div class="telemetry-item">
+              <span class="material-icons icon-blue">speed</span>
+              <div>
+                <span class="t-label">Speed</span>
+                <span class="t-val">{{ currentWaypoint.speed }} km/h</span>
+              </div>
+            </div>
+
+            <div class="telemetry-item full-width">
+              <span class="material-icons icon-blue">place</span>
+              <div>
+                <span class="t-label">Location Landmark</span>
+                <span class="t-val">{{ currentWaypoint.locationName }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Playback Timeline Slider -->
+          <div class="timeline-slider-box">
+            <div class="slider-header">
+              <span>Progress</span>
+              <span>Step {{ playbackIndex + 1 }} / {{ playbackWaypoints.length }}</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              [max]="playbackWaypoints.length - 1"
+              [value]="playbackIndex"
+              (input)="onSliderChange($event)"
+              class="custom-slider" />
+          </div>
+
+          <!-- Play & Speed Controls -->
+          <div class="playback-actions">
+            <button mat-raised-button color="primary" class="play-btn" (click)="togglePlayPause()">
+              <span class="material-icons">{{ isPlaying ? 'pause' : 'play_arrow' }}</span>
+              {{ isPlaying ? 'Pause Playback' : 'Start Playback' }}
+            </button>
+
+            <div class="speed-selector">
+              <button class="speed-btn" [class.active]="playbackSpeed === 1" (click)="setPlaybackSpeed(1)">1x</button>
+              <button class="speed-btn" [class.active]="playbackSpeed === 2" (click)="setPlaybackSpeed(2)">2x</button>
+              <button class="speed-btn" [class.active]="playbackSpeed === 4" (click)="setPlaybackSpeed(4)">4x</button>
+            </div>
+          </div>
+
+        </div>
+
+      }
+
     </div>
 
-    <!-- Vehicle List (Only shown in Live Mode) -->
-    @if (activeTab === 'live') {
-      <div class="vehicle-card">
-        <div class="card-header">
-          <h3>🚚 Fleet Status (Click to Focus)</h3>
-        </div>
-
-        <div
-          class="vehicle-item"
-          *ngFor="let vehicle of vehicles; let i = index"
-          [class.active-item]="selectedVehicle?.id === vehicle.id"
-          (click)="focusVehicle(vehicle, i)">
-
-          <div class="vehicle-info">
-            <h4>{{ vehicle.vehicleNumber }}</h4>
-            <p>{{ vehicle.driver }}</p>
-          </div>
-
-          <div class="vehicle-status">
-            <span
-              class="badge"
-              [ngClass]="{
-                'moving': vehicle.status === 'Moving',
-                'idle': vehicle.status === 'Idle',
-                'offline': vehicle.status === 'Offline'
-              }">
-              {{ vehicle.status }}
-            </span>
-            <p>{{ vehicle.speed }} km/h</p>
-          </div>
-
-        </div>
-      </div>
-    }
+    <!-- Right Map View -->
+    <div class="map-panel">
+      <div id="map" class="google-map"></div>
+    </div>
 
   </div>
 

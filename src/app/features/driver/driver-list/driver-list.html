@@ -1,134 +1,156 @@
-<div class="driver-container">
-
-  <!-- Header -->
-  <div class="driver-header">
-    <div>
-      <h2 class="page-title">🧑‍✈️ Driver Management</h2>
-      <p class="page-subtitle">Manage driver profiles, licenses, vehicle assignments, and safety scores</p>
+<div class="driver-page-container">
+  
+  <!-- Header Bar -->
+  <div class="page-header">
+    <div class="header-title">
+      <div class="icon-badge">
+        <span class="material-icons">badge</span>
+      </div>
+      <div>
+        <h1>Driver Management &amp; Safety Scorecard</h1>
+        <p>Driver onboarding, gamified safety rankings, and real-time telemetry behavior events</p>
+      </div>
     </div>
 
-    <button
-      mat-raised-button
-      color="primary"
-      class="add-btn"
-      (click)="addDriver()">
-      <mat-icon>person_add</mat-icon>
-      <span>Onboard New Driver</span>
-    </button>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" class="add-btn" (click)="addDriver()">
+        <span class="material-icons">person_add</span>
+        Onboard New Driver
+      </button>
+    </div>
   </div>
 
-  <!-- Real-Time Computed Stats Cards -->
-  <div class="stats-container">
-
-    <div class="stat-card total" (click)="filterByStatus('All')">
-      <div class="card-icon">🧑‍✈️</div>
-      <div class="card-content">
-        <h2>{{ totalDriversCount }}</h2>
-        <p>Total Registered Drivers</p>
+  <!-- KPI Stat Cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon-box total">
+        <span class="material-icons">group</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ totalDriversCount }}</span>
+        <span class="kpi-label">Total Drivers</span>
       </div>
     </div>
 
-    <div class="stat-card available" (click)="filterByStatus('Available')">
-      <div class="card-icon">✅</div>
-      <div class="card-content">
-        <h2>{{ availableCount }}</h2>
-        <p>Available for Duty</p>
+    <div class="kpi-card">
+      <div class="kpi-icon-box available">
+        <span class="material-icons">check_circle</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ availableCount }}</span>
+        <span class="kpi-label">Available (Ready)</span>
       </div>
     </div>
 
-    <div class="stat-card ontrip" (click)="filterByStatus('On Trip')">
-      <div class="card-icon">🚚</div>
-      <div class="card-content">
-        <h2>{{ onTripCount }}</h2>
-        <p>Currently On Trip</p>
+    <div class="kpi-card">
+      <div class="kpi-icon-box trip">
+        <span class="material-icons">local_shipping</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ onTripCount }}</span>
+        <span class="kpi-label">Currently On Trip</span>
       </div>
     </div>
 
-    <div class="stat-card safety">
-      <div class="card-icon">🛡️</div>
-      <div class="card-content">
-        <h2>{{ avgSafetyScore }}%</h2>
-        <p>Average Safety Rating</p>
+    <div class="kpi-card">
+      <div class="kpi-icon-box score">
+        <span class="material-icons">verified_user</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ avgSafetyScore }}/100</span>
+        <span class="kpi-label">Avg. Safety Score</span>
       </div>
     </div>
-
   </div>
 
-  <!-- Search & Filter Bar -->
-  <div class="toolbar-card">
+  <!-- GAMIFIED SAFETY LEADERBOARD SECTION -->
+  <div class="leaderboard-section">
+    <div class="section-title">
+      <span class="material-icons gold-text">emoji_events</span>
+      <h2>Monthly Safety Score Leaderboard</h2>
+    </div>
 
+    <div class="leaderboard-grid">
+      @for (lb of leaderboardBadges; track lb.rank) {
+        <div class="leaderboard-card" [class.rank-1]="lb.rank === 1">
+          <div class="rank-badge">#{{ lb.rank }}</div>
+          <div class="lb-driver-info">
+            <h3>{{ lb.driver }}</h3>
+            <span class="award-tag">{{ lb.badge }}</span>
+          </div>
+          <div class="lb-score-box">
+            <span class="lb-score">{{ lb.score }}</span>
+            <span class="lb-score-lbl">Safety Score</span>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Filter & Search Toolbar -->
+  <div class="table-toolbar">
     <div class="filter-pills">
-      <button class="pill-btn" [class.active]="activeFilter === 'All'" (click)="filterByStatus('All')">All Drivers</button>
+      <button class="pill-btn" [class.active]="activeFilter === 'All'" (click)="filterByStatus('All')">All</button>
       <button class="pill-btn" [class.active]="activeFilter === 'Available'" (click)="filterByStatus('Available')">Available</button>
       <button class="pill-btn" [class.active]="activeFilter === 'On Trip'" (click)="filterByStatus('On Trip')">On Trip</button>
       <button class="pill-btn" [class.active]="activeFilter === 'Off Duty'" (click)="filterByStatus('Off Duty')">Off Duty</button>
     </div>
 
-    <mat-form-field appearance="outline" class="search-box">
-      <mat-label>Search Drivers</mat-label>
-      <input
-        #input
-        matInput
-        placeholder="Search by driver name, license, or vehicle..."
-        (keyup)="applyFilter($event)">
-      <mat-icon matSuffix>search</mat-icon>
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Search by driver name, license, phone..." />
     </mat-form-field>
-
   </div>
 
-  <!-- Drivers Table -->
+  <!-- Main Driver Table -->
   <div class="table-container">
-
-    <table
-      mat-table
-      [dataSource]="dataSource"
-      class="driver-table">
-
-      <!-- Driver Name & Avatar -->
+    <table mat-table [dataSource]="dataSource" class="custom-table">
+      
+      <!-- Name -->
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef>Driver Name</th>
-        <td mat-cell *matCellDef="let driver" class="driver-name-cell">
-          <div class="avatar-sm">{{ driver.name.charAt(0) }}</div>
-          <div>
-            <span class="driver-name">{{ driver.name }}</span>
-            <span class="driver-exp">{{ driver.experienceYears }} Years Exp</span>
+        <td mat-cell *matCellDef="let d">
+          <div class="driver-cell" (click)="viewDriverProfile(d)">
+            <div class="driver-avatar">{{ d.name.substring(0,2).toUpperCase() }}</div>
+            <div>
+              <span class="driver-name-text">{{ d.name }}</span>
+              <span class="driver-sub-text">Joined {{ d.joinDate }}</span>
+            </div>
           </div>
         </td>
       </ng-container>
 
       <!-- Phone -->
       <ng-container matColumnDef="phone">
-        <th mat-header-cell *matHeaderCellDef>Contact Phone</th>
-        <td mat-cell *matCellDef="let driver">
-          {{ driver.phone }}
-        </td>
+        <th mat-header-cell *matHeaderCellDef>Phone</th>
+        <td mat-cell *matCellDef="let d">{{ d.phone }}</td>
       </ng-container>
 
       <!-- License Number -->
       <ng-container matColumnDef="licenseNumber">
-        <th mat-header-cell *matHeaderCellDef>License Number</th>
-        <td mat-cell *matCellDef="let driver">
-          <span class="license-badge">{{ driver.licenseNumber }}</span>
+        <th mat-header-cell *matHeaderCellDef>License No.</th>
+        <td mat-cell *matCellDef="let d">
+          <span class="license-badge">{{ d.licenseNumber }}</span>
         </td>
       </ng-container>
 
       <!-- Assigned Vehicle -->
       <ng-container matColumnDef="assignedVehicle">
         <th mat-header-cell *matHeaderCellDef>Assigned Vehicle</th>
-        <td mat-cell *matCellDef="let driver">
-          <span class="vehicle-link" [class.unassigned]="driver.assignedVehicle === 'Not Assigned'">
-            {{ driver.assignedVehicle }}
-          </span>
+        <td mat-cell *matCellDef="let d">
+          <span class="vehicle-badge">{{ d.assignedVehicle }}</span>
         </td>
       </ng-container>
 
       <!-- Safety Score -->
       <ng-container matColumnDef="safetyScore">
         <th mat-header-cell *matHeaderCellDef>Safety Score</th>
-        <td mat-cell *matCellDef="let driver">
-          <div class="score-badge" [class.high]="(driver.safetyScore || 95) >= 95">
-            <span class="material-icons star-icon">star</span>
-            <span>{{ driver.safetyScore || 95 }}%</span>
+        <td mat-cell *matCellDef="let d">
+          <div class="score-progress-bar">
+            <span class="score-num" [class.high-score]="d.safetyScore >= 95">{{ d.safetyScore }}/100</span>
+            <div class="bar-track">
+              <div class="bar-fill" [style.width.%]="d.safetyScore" [class.fill-high]="d.safetyScore >= 95"></div>
+            </div>
           </div>
         </td>
       </ng-container>
@@ -136,147 +158,91 @@
       <!-- Status -->
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Status</th>
-        <td mat-cell *matCellDef="let driver">
-          <span
-            class="status-badge"
-            [ngClass]="{
-              'available': driver.status === 'Available',
-              'ontrip': driver.status === 'On Trip',
-              'offduty': driver.status === 'Off Duty'
-            }">
-            {{ driver.status }}
-          </span>
+        <td mat-cell *matCellDef="let d">
+          <span class="status-pill" [class]="d.status.toLowerCase().replace(' ', '-')">{{ d.status }}</span>
         </td>
       </ng-container>
 
       <!-- Actions -->
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let driver" (click)="$event.stopPropagation()">
-          <button
-            mat-icon-button
-            color="primary"
-            title="View Driver Profile"
-            (click)="viewDriverProfile(driver)">
-            <mat-icon>account_box</mat-icon>
-          </button>
-
-          <button
-            mat-icon-button
-            color="accent"
-            title="Edit Driver"
-            (click)="editDriver(driver)">
-            <mat-icon>edit</mat-icon>
-          </button>
-
-          <button
-            mat-icon-button
-            color="warn"
-            title="Remove Driver"
-            (click)="deleteDriver(driver)">
-            <mat-icon>delete</mat-icon>
-          </button>
+        <td mat-cell *matCellDef="let d">
+          <div class="action-buttons">
+            <button mat-icon-button color="primary" (click)="viewDriverProfile(d)" title="View Profile">
+              <span class="material-icons">visibility</span>
+            </button>
+            <button mat-icon-button color="accent" (click)="editDriver(d)" title="Edit">
+              <span class="material-icons">edit</span>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteDriver(d)" title="Delete">
+              <span class="material-icons">delete_outline</span>
+            </button>
+          </div>
         </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row" (click)="viewDriverProfile(row)"></tr>
-
-      <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell" colspan="7">
-          No drivers matching "{{ input.value }}"
-        </td>
-      </tr>
-
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
-
   </div>
 
-  <!-- Slide-Out Driver Profile Drawer -->
+  <!-- TELEMETRY INCIDENT EVENT LOGS -->
+  <div class="events-section">
+    <div class="section-title">
+      <span class="material-icons warning-text">report_problem</span>
+      <h2>Real-Time Telemetry Incidents Log</h2>
+    </div>
+
+    <div class="events-list">
+      @for (ev of telemetryEvents; track ev.time) {
+        <div class="event-card">
+          <div class="ev-badge red-bg">
+            <span class="material-icons">warning</span>
+          </div>
+          <div class="ev-info">
+            <h4>{{ ev.eventType }} · <span class="ev-impact">{{ ev.impactScore }} pts</span></h4>
+            <p>Driver: <b>{{ ev.driverName }}</b> ({{ ev.vehicle }}) · Location: {{ ev.location }}</p>
+          </div>
+          <span class="ev-time">{{ ev.time }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- SLIDE-OUT DRIVER DRAWER -->
   @if (isDrawerOpen && selectedDriver) {
     <div class="drawer-overlay" (click)="closeDrawer()"></div>
-    <aside class="driver-profile-drawer">
+    <div class="drawer-panel">
       <div class="drawer-header">
-        <div class="driver-card-top">
-          <div class="avatar-lg">{{ selectedDriver.name.charAt(0) }}</div>
-          <div>
-            <h3>{{ selectedDriver.name }}</h3>
-            <p>{{ selectedDriver.email }}</p>
-            <span class="status-badge" [class]="selectedDriver.status.toLowerCase().replace(' ', '')">{{ selectedDriver.status }}</span>
-          </div>
+        <div class="drawer-avatar">{{ selectedDriver.name.substring(0,2).toUpperCase() }}</div>
+        <div>
+          <h2>{{ selectedDriver.name }}</h2>
+          <span class="status-pill" [class]="selectedDriver.status.toLowerCase().replace(' ', '-')">{{ selectedDriver.status }}</span>
         </div>
-        <button class="close-btn" (click)="closeDrawer()">
+        <button class="close-drawer-btn" (click)="closeDrawer()">
           <span class="material-icons">close</span>
         </button>
       </div>
 
       <div class="drawer-body">
-
-        <!-- Performance Stats Cards -->
-        <div class="perf-grid">
-          <div class="perf-card">
-            <span class="material-icons p-icon gold">star</span>
-            <div>
-              <h4>{{ selectedDriver.rating }} ★</h4>
-              <p>Rating</p>
-            </div>
-          </div>
-          <div class="perf-card">
-            <span class="material-icons p-icon green">verified</span>
-            <div>
-              <h4>{{ selectedDriver.safetyScore }}%</h4>
-              <p>Safety Score</p>
-            </div>
-          </div>
-          <div class="perf-card">
-            <span class="material-icons p-icon blue">directions_car</span>
-            <div>
-              <h4>{{ selectedDriver.tripsCompleted }}</h4>
-              <p>Trips Done</p>
-            </div>
-          </div>
+        <div class="drawer-section">
+          <h3>Driver Information</h3>
+          <div class="info-row"><span class="lbl">Email:</span><span class="val">{{ selectedDriver.email }}</span></div>
+          <div class="info-row"><span class="lbl">Phone:</span><span class="val">{{ selectedDriver.phone }}</span></div>
+          <div class="info-row"><span class="lbl">License No:</span><span class="val">{{ selectedDriver.licenseNumber }}</span></div>
+          <div class="info-row"><span class="lbl">License Expiry:</span><span class="val">{{ selectedDriver.licenseExpiry }}</span></div>
+          <div class="info-row"><span class="lbl">Emergency Contact:</span><span class="val">{{ selectedDriver.emergencyContact }}</span></div>
         </div>
 
-        <!-- Details Grid -->
-        <div class="details-section">
-          <h4 class="section-sub"><span class="material-icons">badge</span> Driver Information</h4>
-          
-          <div class="info-grid">
-            <div class="info-item">
-              <span class="info-label">Phone</span>
-              <span class="info-val">{{ selectedDriver.phone }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">License Number</span>
-              <span class="info-val highlight-val">{{ selectedDriver.licenseNumber }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">License Expiry</span>
-              <span class="info-val">{{ selectedDriver.licenseExpiry }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Assigned Vehicle</span>
-              <span class="info-val">{{ selectedDriver.assignedVehicle }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Experience</span>
-              <span class="info-val">{{ selectedDriver.experienceYears }} Years</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Emergency Contact</span>
-              <span class="info-val">{{ selectedDriver.emergencyContact }}</span>
-            </div>
-          </div>
+        <div class="drawer-section">
+          <h3>Performance Metrics</h3>
+          <div class="info-row"><span class="lbl">Experience:</span><span class="val">{{ selectedDriver.experienceYears }} Years</span></div>
+          <div class="info-row"><span class="lbl">Rating:</span><span class="val">⭐ {{ selectedDriver.rating }}/5.0</span></div>
+          <div class="info-row"><span class="lbl">Completed Trips:</span><span class="val">{{ selectedDriver.tripsCompleted }} Trips</span></div>
+          <div class="info-row"><span class="lbl">Safety Score:</span><span class="val high-score">{{ selectedDriver.safetyScore }}/100</span></div>
         </div>
-
       </div>
-
-      <div class="drawer-footer">
-        <button mat-raised-button color="primary" (click)="editDriver(selectedDriver)">
-          <mat-icon>edit</mat-icon> Edit Profile &amp; Vehicle Assignment
-        </button>
-      </div>
-    </aside>
+    </div>
   }
 
 </div>

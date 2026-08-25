@@ -1,100 +1,297 @@
-<div class="login-container">
-  <!-- 3D Background Overlay -->
-  <div class="bg-overlay"></div>
+<div class="centered-auth-container">
+  
+  <!-- Scattered Floating Fleet & IoT Background Icons (Bazario Style) -->
+  <div class="watermark-icon-field">
+    <span class="material-icons float-icon icon-1">local_shipping</span>
+    <span class="material-icons float-icon icon-2">satellite_alt</span>
+    <span class="material-icons float-icon icon-3">location_on</span>
+    <span class="material-icons float-icon icon-4">alt_route</span>
+    <span class="material-icons float-icon icon-5">bolt</span>
+    <span class="material-icons float-icon icon-6">thermostat</span>
+    <span class="material-icons float-icon icon-7">shield</span>
+    <span class="material-icons float-icon icon-8">inventory_2</span>
+    <span class="material-icons float-icon icon-9">sensors</span>
+    <span class="material-icons float-icon icon-10">directions_car</span>
+  </div>
 
-  <!-- Center-aligned Glassmorphism Login Card -->
-  <div class="login-card-wrapper">
-    <div class="glass-card">
-      <!-- Header / Logo -->
-      <div class="card-header">
-        <div class="brand-badge">
-          <span class="material-icons brand-icon">local_shipping</span>
-        </div>
-        <h1 class="brand-title">Smart Fleet</h1>
-        <p class="brand-subtitle">Real-Time Fleet & Route Optimization Platform</p>
-      </div>
-
-      <!-- Error Alert -->
-      @if (loginError) {
-        <div class="error-alert">
-          <span class="material-icons">error_outline</span>
-          <span>{{ loginError }}</span>
-        </div>
-      }
-
-      <!-- Form -->
-      <form [formGroup]="loginForm" (ngSubmit)="login()" class="login-form">
-
-        <!-- Email Field -->
-        <div class="field-container">
-          <label class="field-label">Email Address</label>
-          <div class="input-box" [class.input-error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
-            <span class="material-icons field-icon">mail_outline</span>
-            <input
-              type="email"
-              formControlName="email"
-              placeholder="admin@smartfleet.com"
-              class="custom-input" />
-          </div>
-          @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
-            <span class="error-text">{{ getEmailError() }}</span>
-          }
-        </div>
-
-        <!-- Password Field -->
-        <div class="field-container">
-          <label class="field-label">Password</label>
-          <div class="input-box" [class.input-error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
-            <span class="material-icons field-icon">lock_outline</span>
-            <input
-              [type]="hidePassword ? 'password' : 'text'"
-              formControlName="password"
-              placeholder="Enter your password"
-              class="custom-input" />
-            <button type="button" class="toggle-eye" (click)="hidePassword = !hidePassword">
-              <span class="material-icons">{{ hidePassword ? 'visibility_off' : 'visibility' }}</span>
-            </button>
-          </div>
-          @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
-            <span class="error-text">{{ getPasswordError() }}</span>
-          }
-        </div>
-
-        <!-- Options -->
-        <div class="options-bar">
-          <label class="remember-me">
-            <input type="checkbox" formControlName="rememberMe" class="custom-checkbox" />
-            <span>Remember me</span>
-          </label>
-          <a routerLink="/forgot-password" class="forgot-link">Forgot password?</a>
-        </div>
-
-        <!-- Submit Button -->
-        <button
-          type="submit"
-          class="submit-button"
-          [disabled]="loginForm.invalid || isLoading"
-          [class.button-loading]="isLoading">
-          @if (isLoading) {
-            <span class="spinner"></span>
-            <span>Authenticating...</span>
-          } @else {
-            <span class="material-icons">arrow_forward</span>
-            <span>Sign In to Dashboard</span>
-          }
-        </button>
-      </form>
-
-      <!-- Demo Tip -->
-      <div class="demo-badge">
-        <span class="material-icons icon-tip">bolt</span>
-        <span><b>Quick Access:</b> Use any valid email + 8 character password</span>
-      </div>
-
-      <!-- Footer -->
-      <div class="card-footer">
-        <span>© 2026 Smart Fleet System · Enterprise Edition</span>
-      </div>
+  <!-- TOP CENTER BRAND BAR -->
+  <div class="top-brand-bar">
+    <div class="brand-logo-pill">
+      <span class="material-icons brand-icon">local_shipping</span>
+      <span class="brand-title">Smart Fleet Enterprise</span>
     </div>
   </div>
+
+  <!-- CENTERED GLASS AUTH CARD (BAZARIO STYLE) -->
+  <div class="center-card-wrapper">
+    <div class="glass-auth-card">
+      
+      <!-- Brand Icon Header Badge -->
+      <div class="card-brand-badge">
+        <span class="material-icons logo-icon">security</span>
+      </div>
+
+      <!-- Segmented Pill Tab Switcher -->
+      <div class="tab-switcher">
+        <button
+          type="button"
+          class="tab-pill"
+          [class.active]="activeTab === 'register'"
+          (click)="setTab('register')">
+          <span class="material-icons">person_add</span>
+          <span>Create Account</span>
+        </button>
+
+        <button
+          type="button"
+          class="tab-pill"
+          [class.active]="activeTab === 'login'"
+          (click)="setTab('login')">
+          <span class="material-icons">login</span>
+          <span>Sign In</span>
+        </button>
+      </div>
+
+      <!-- ================= TAB 1: REGISTER ================= -->
+      @if (activeTab === 'register') {
+        <div class="form-header">
+          <h2>Create Account 👋</h2>
+          <p>Register to manage telematics, routes &amp; driver scorecards</p>
+        </div>
+
+        @if (regError) {
+          <div class="alert-box error-alert">
+            <span class="material-icons">error_outline</span>
+            <span>{{ regError }}</span>
+          </div>
+        }
+
+        @if (regSuccess) {
+          <div class="alert-box success-alert">
+            <span class="material-icons">check_circle</span>
+            <span>{{ regSuccess }}</span>
+          </div>
+        }
+
+        <form [formGroup]="registerForm" (ngSubmit)="registerUser()" class="auth-form-grid">
+          
+          <!-- Full Name -->
+          <div class="form-group">
+            <label class="group-label">Full Name *</label>
+            <div class="input-wrapper">
+              <span class="material-icons input-icon">person_outline</span>
+              <input
+                type="text"
+                formControlName="name"
+                placeholder="Rahul Kumar"
+                class="form-input" />
+            </div>
+          </div>
+
+          <!-- Gmail Address -->
+          <div class="form-group">
+            <label class="group-label">Gmail Address *</label>
+            <div class="input-wrapper">
+              <span class="material-icons input-icon">mail_outline</span>
+              <input
+                type="email"
+                formControlName="email"
+                placeholder="user@gmail.com"
+                class="form-input" />
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label class="group-label">Password *</label>
+            <div class="input-wrapper">
+              <span class="material-icons input-icon">lock_outline</span>
+              <input
+                [type]="hideRegPassword ? 'password' : 'text'"
+                formControlName="password"
+                placeholder="Min 6 characters"
+                class="form-input" />
+              <button type="button" class="eye-toggle" (click)="hideRegPassword = !hideRegPassword">
+                <span class="material-icons">{{ hideRegPassword ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="form-group">
+            <label class="group-label">Phone Number</label>
+            <div class="input-wrapper">
+              <span class="material-icons input-icon">phone_iphone</span>
+              <input
+                type="text"
+                formControlName="phone"
+                placeholder="+91 98765 43210"
+                class="form-input" />
+            </div>
+          </div>
+
+          <!-- Account Role -->
+          <div class="form-group full-width">
+            <label class="group-label">Account Role *</label>
+            <div class="input-wrapper">
+              <span class="material-icons input-icon">badge</span>
+              <select formControlName="role" class="form-select">
+                @for (r of roles; track r.value) {
+                  <option [value]="r.value">{{ r.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="auth-submit-btn full-width" [disabled]="isRegLoading">
+            @if (isRegLoading) {
+              <span class="spinner"></span>
+              <span>Registering to Database...</span>
+            } @else {
+              <span class="material-icons">how_to_reg</span>
+              <span>Create Fleet Account</span>
+            }
+          </button>
+
+          <!-- Already registered link -->
+          <div class="tab-switch-footer full-width">
+            <span>Already have an account?</span>
+            <button type="button" class="link-switch-btn" (click)="setTab('login')">Sign In Here</button>
+          </div>
+
+        </form>
+      }
+
+      <!-- ================= TAB 2: SIGN IN ================= -->
+      @if (activeTab === 'login') {
+        <div class="form-header">
+          <h2>Welcome Back 👋</h2>
+          <p>Sign in to manage operations across your fleet dashboard</p>
+        </div>
+
+        @if (loginError) {
+          <div class="alert-box error-alert">
+            <span class="material-icons">error_outline</span>
+            <span>{{ loginError }}</span>
+          </div>
+        }
+
+        @if (regSuccess) {
+          <div class="alert-box success-alert">
+            <span class="material-icons">check_circle</span>
+            <span>{{ regSuccess }}</span>
+          </div>
+        }
+
+        <form [formGroup]="loginForm" (ngSubmit)="login()" class="auth-form-single">
+          
+          <!-- Email Field -->
+          <div class="form-group">
+            <label class="group-label">Email address</label>
+            <div class="input-wrapper">
+              <span class="material-icons input-icon">mail_outline</span>
+              <input
+                type="email"
+                formControlName="email"
+                placeholder="admin@smartfleet.com"
+                class="form-input" />
+            </div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="form-group">
+            <label class="group-label">Password</label>
+            <div class="input-wrapper">
+              <span class="material-icons input-icon">lock_outline</span>
+              <input
+                [type]="hidePassword ? 'password' : 'text'"
+                formControlName="password"
+                placeholder="Enter password"
+                class="form-input" />
+              <button type="button" class="eye-toggle" (click)="hidePassword = !hidePassword">
+                <span class="material-icons">{{ hidePassword ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Remember & Forgot bar -->
+          <div class="options-bar">
+            <label class="remember-label">
+              <input type="checkbox" formControlName="rememberMe" />
+              <span>Remember me</span>
+            </label>
+            <a routerLink="/forgot-password" class="forgot-password-link">Forgot password?</a>
+          </div>
+
+          <!-- Submit Sign In Button (High Contrast Glow) -->
+          <button type="submit" class="auth-submit-btn amber-glow-btn" [disabled]="isLoading">
+            @if (isLoading) {
+              <span class="spinner"></span>
+              <span>Authenticating...</span>
+            } @else {
+              <span class="material-icons">arrow_forward</span>
+              <span>Sign In to Command Center</span>
+            }
+          </button>
+
+          <!-- SSO Bar -->
+          <div class="sso-divider">
+            <span>Or Sign In With</span>
+          </div>
+
+          <div class="sso-buttons">
+            <button type="button" class="sso-btn" (click)="setTab('login')">
+              <span class="material-icons google-icon">g_translate</span>
+              Google
+            </button>
+            <button type="button" class="sso-btn" (click)="setTab('login')">
+              <span class="material-icons sso-icon">domain</span>
+              Enterprise SSO
+            </button>
+          </div>
+
+          <!-- Need account link -->
+          <div class="tab-switch-footer">
+            <span>Don't have an account?</span>
+            <button type="button" class="link-switch-btn" (click)="setTab('register')">Register Account</button>
+          </div>
+
+        </form>
+      }
+
+      <div class="card-footer">
+        <span>© 2026 Smart Fleet System · Enterprise MySQL Persistence Active</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- UNREGISTERED USER REGISTRATION MODAL POPUP -->
+  @if (showUnregisteredModal) {
+    <div class="modal-overlay">
+      <div class="unregistered-modal glass-card">
+        <div class="modal-icon-header warning-icon">
+          <span class="material-icons">person_add_disabled</span>
+        </div>
+
+        <div class="modal-content-text">
+          <h3>Unregistered User Account! ⚠️</h3>
+          <p>The account for <b class="highlight-email">{{ unregisteredEmail }}</b> is not registered in our MySQL database.</p>
+          <p class="sub-hint">Please register your account first to access the Smart Fleet Command Center.</p>
+        </div>
+
+        <div class="modal-actions-bar">
+          <button type="button" class="modal-cancel-btn" (click)="closeUnregisteredModal()">
+            Cancel
+          </button>
+          <button type="button" class="modal-register-btn" (click)="redirectToRegister()">
+            <span class="material-icons">how_to_reg</span>
+            Register Account Now
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
 </div>

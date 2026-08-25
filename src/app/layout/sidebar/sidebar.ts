@@ -31,6 +31,7 @@ export class Sidebar {
     { name: 'Trips',             icon: 'directions_car',    route: '/trips' },
     { name: 'Fuel Management',   icon: 'local_gas_station', route: '/fuel' },
     { name: 'Route Optimizer',   icon: 'alt_route',         route: '/route-optimization' },
+    { name: 'Driver Mobile POD', icon: 'smartphone',        route: '/driver-portal' },
     { name: 'Reports & Export',  icon: 'bar_chart',         route: '/reports' },
     { name: 'System Settings',   icon: 'settings',          route: '/settings' }
   ];

@@ -60,6 +60,9 @@ export class FuelManagement implements OnInit, AfterViewInit {
   selectedFuel: Fuel | null = null;
   isDrawerOpen = false;
   isAddModalOpen = false;
+  isOcrModalOpen = false;
+  isOcrScanning = false;
+  ocrSuccess = false;
 
   fuelForm!: FormGroup;
 
@@ -238,6 +241,45 @@ export class FuelManagement implements OnInit, AfterViewInit {
 
   closeAddModal(): void {
     this.isAddModalOpen = false;
+  }
+
+  // AI Receipt OCR Scanner Modal Methods
+  openOcrModal(): void {
+    this.isOcrModalOpen = true;
+    this.isOcrScanning = false;
+    this.ocrSuccess = false;
+  }
+
+  closeOcrModal(): void {
+    this.isOcrModalOpen = false;
+  }
+
+  simulateOcrScan(): void {
+    this.isOcrScanning = true;
+    this.ocrSuccess = false;
+
+    setTimeout(() => {
+      this.isOcrScanning = false;
+      this.ocrSuccess = true;
+
+      // Auto fill Form values parsed by OCR
+      this.fuelForm.patchValue({
+        vehicle: 'OD-02-AB-1234',
+        driver: 'Rahul Kumar',
+        station: 'Indian Oil (Master Canteen)',
+        liters: 52.5,
+        pricePerLiter: 96.5,
+        mileage: 15.6,
+        odometer: 32800,
+        paymentMethod: 'Corporate Card'
+      });
+
+      setTimeout(() => {
+        this.closeOcrModal();
+        this.openAddModal();
+      }, 1200);
+
+    }, 2000);
   }
 
   submitAddFuel(): void {

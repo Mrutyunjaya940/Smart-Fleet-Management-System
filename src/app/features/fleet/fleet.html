@@ -1,217 +1,244 @@
-<div class="fleet-container">
-
-  <!-- Header -->
-  <div class="fleet-header">
-    <div>
-      <h2 class="page-title">🚚 Fleet Management</h2>
-      <p class="page-subtitle">Manage vehicle inventory, assignments, specs, and service history</p>
+<div class="fleet-page-container">
+  
+  <!-- Header Bar -->
+  <div class="page-header">
+    <div class="header-title">
+      <div class="icon-badge">
+        <span class="material-icons">local_shipping</span>
+      </div>
+      <div>
+        <h1>Fleet Inventory, Documents &amp; Maintenance</h1>
+        <p>Vehicle registry, odometer tracking, document expiry warnings, and repair cost analytics</p>
+      </div>
     </div>
 
-    <button
-      mat-raised-button
-      color="primary"
-      class="add-btn"
-      (click)="addVehicle()">
-      <mat-icon>add</mat-icon>
-      <span>Add New Vehicle</span>
-    </button>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" class="add-btn" (click)="addVehicle()">
+        <span class="material-icons">add</span>
+        Add New Vehicle
+      </button>
+    </div>
   </div>
 
-  <!-- Real-Time Computed Statistics Cards -->
-  <div class="stats-container">
-
-    <div class="stat-card total" (click)="filterByStatus('All')">
-      <div class="card-icon">🚚</div>
-      <div class="card-content">
-        <h2>{{ totalVehiclesCount }}</h2>
-        <p>Total Fleet Vehicles</p>
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon-box total">
+        <span class="material-icons">directions_bus</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ totalVehiclesCount }}</span>
+        <span class="kpi-label">Total Fleet Vehicles</span>
       </div>
     </div>
 
-    <div class="stat-card active" (click)="filterByStatus('Active')">
-      <div class="card-icon">✅</div>
-      <div class="card-content">
-        <h2>{{ activeVehiclesCount }}</h2>
-        <p>Active On Road</p>
+    <div class="kpi-card">
+      <div class="kpi-icon-box active">
+        <span class="material-icons">local_shipping</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ activeVehiclesCount }}</span>
+        <span class="kpi-label">Active (In Transit)</span>
       </div>
     </div>
 
-    <div class="stat-card available" (click)="filterByStatus('Available')">
-      <div class="card-icon">🅿️</div>
-      <div class="card-content">
-        <h2>{{ availableVehiclesCount }}</h2>
-        <p>Available / Ready</p>
+    <div class="kpi-card">
+      <div class="kpi-icon-box available">
+        <span class="material-icons">check_circle</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ availableVehiclesCount }}</span>
+        <span class="kpi-label">Available (Idle)</span>
       </div>
     </div>
 
-    <div class="stat-card maintenance" (click)="filterByStatus('Maintenance')">
-      <div class="card-icon">🛠️</div>
-      <div class="card-content">
-        <h2>{{ maintenanceVehiclesCount }}</h2>
-        <p>Under Maintenance</p>
+    <div class="kpi-card">
+      <div class="kpi-icon-box maint">
+        <span class="material-icons">build</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ maintenanceVehiclesCount }}</span>
+        <span class="kpi-label">In Maintenance</span>
       </div>
     </div>
-
   </div>
 
-  <!-- Search & Filter Bar -->
-  <div class="toolbar-card">
+  <!-- VEHICLE DOCUMENT & INSURANCE EXPIRY TRACKER -->
+  <div class="maint-section">
+    <div class="section-title">
+      <span class="material-icons red-text">verified</span>
+      <h2>Vehicle Document &amp; Insurance Expiry Tracker</h2>
+    </div>
 
+    <div class="doc-grid">
+      @for (doc of docExpiryAlerts; track doc.vehicleNumber + doc.docName) {
+        <div class="doc-card" [class.expired]="doc.status === 'Expired'" [class.expiring]="doc.status === 'Expiring Soon'">
+          <div class="doc-icon-box">
+            <span class="material-icons">assignment_late</span>
+          </div>
+          <div class="doc-info">
+            <h4>{{ doc.vehicleNumber }} — {{ doc.docName }}</h4>
+            <p>Expiry Date: <b>{{ doc.expiryDate }}</b></p>
+          </div>
+          <span class="doc-status-badge" [class]="doc.status.toLowerCase().replace(' ', '-')">{{ doc.status }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- PREDICTIVE MAINTENANCE ENGINE SECTION -->
+  <div class="maint-section">
+    <div class="section-title">
+      <span class="material-icons orange-text">engineering</span>
+      <h2>Predictive Maintenance Engine (@ 10,000 km Service Alerts)</h2>
+    </div>
+
+    <div class="maint-grid">
+
+      <!-- Alerts List -->
+      <div class="alerts-card">
+        <h3>Automated Service Threshold Warnings</h3>
+        <div class="alerts-list">
+          @for (alt of predictiveAlerts; track alt.vehicleNumber) {
+            <div class="alert-item" [class.immediate]="alt.urgency === 'Immediate'">
+              <div class="alert-icon-box">
+                <span class="material-icons">build_circle</span>
+              </div>
+              <div class="alert-info">
+                <h4>{{ alt.vehicleNumber }} ({{ alt.model }})</h4>
+                <p>{{ alt.serviceType }} · Current: <b>{{ alt.odometer | number }} km</b> / Threshold: {{ alt.thresholdKm | number }} km</p>
+              </div>
+              <span class="urgency-badge" [class.red-bg]="alt.urgency === 'Immediate'">{{ alt.urgency }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Maintenance Cost Breakdown -->
+      <div class="analytics-card">
+        <h3>Repair Cost Breakdown per Vehicle Model</h3>
+        <div class="cost-list">
+          @for (m of modelCostBreakdown; track m.model) {
+            <div class="cost-row">
+              <span class="model-name">{{ m.model }}</span>
+              <div class="cost-bar-track">
+                <div class="cost-bar-fill" [style.width.%]="(m.totalCost / 15000) * 100"></div>
+              </div>
+              <span class="cost-val">₹{{ m.totalCost | number }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Filter & Search Toolbar -->
+  <div class="table-toolbar">
     <div class="filter-pills">
-      <button class="pill-btn" [class.active]="activeFilter === 'All'" (click)="filterByStatus('All')">All Vehicles</button>
+      <button class="pill-btn" [class.active]="activeFilter === 'All'" (click)="filterByStatus('All')">All</button>
       <button class="pill-btn" [class.active]="activeFilter === 'Active'" (click)="filterByStatus('Active')">Active</button>
       <button class="pill-btn" [class.active]="activeFilter === 'Available'" (click)="filterByStatus('Available')">Available</button>
       <button class="pill-btn" [class.active]="activeFilter === 'Maintenance'" (click)="filterByStatus('Maintenance')">Maintenance</button>
     </div>
 
-    <mat-form-field appearance="outline" class="search-box">
-      <mat-label>Search Fleet</mat-label>
-      <input
-        #input
-        matInput
-        placeholder="Search by license plate, driver, or type..."
-        (keyup)="applyFilter($event)">
-      <mat-icon matSuffix>search</mat-icon>
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Search by vehicle no, model, type..." />
     </mat-form-field>
-
   </div>
 
-  <!-- Vehicle Table -->
+  <!-- Vehicles Table -->
   <div class="table-container">
-
-    <table
-      mat-table
-      [dataSource]="dataSource"
-      class="fleet-table">
-
+    <table mat-table [dataSource]="dataSource" class="custom-table">
+      
       <!-- Vehicle Number -->
       <ng-container matColumnDef="vehicleNumber">
-        <th mat-header-cell *matHeaderCellDef>Vehicle Number</th>
-        <td mat-cell *matCellDef="let vehicle" class="plate-cell">
-          <span class="vehicle-plate">{{ vehicle.vehicleNumber }}</span>
+        <th mat-header-cell *matHeaderCellDef>Vehicle No.</th>
+        <td mat-cell *matCellDef="let v">
+          <div class="vehicle-cell" (click)="viewVehicleDetails(v)">
+            <span class="vehicle-badge">{{ v.vehicleNumber }}</span>
+          </div>
         </td>
       </ng-container>
 
       <!-- Model Name -->
       <ng-container matColumnDef="modelName">
-        <th mat-header-cell *matHeaderCellDef>Model Spec</th>
-        <td mat-cell *matCellDef="let vehicle">
-          {{ vehicle.modelName || 'Standard Fleet Truck' }}
-        </td>
+        <th mat-header-cell *matHeaderCellDef>Model</th>
+        <td mat-cell *matCellDef="let v">{{ v.modelName }}</td>
       </ng-container>
 
       <!-- Type -->
       <ng-container matColumnDef="type">
-        <th mat-header-cell *matHeaderCellDef>Category</th>
-        <td mat-cell *matCellDef="let vehicle">
-          <span class="type-chip">{{ vehicle.type }}</span>
-        </td>
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let v">{{ v.type }}</td>
       </ng-container>
 
       <!-- Fuel Type -->
       <ng-container matColumnDef="fuelType">
-        <th mat-header-cell *matHeaderCellDef>Fuel</th>
-        <td mat-cell *matCellDef="let vehicle">
-          <span class="fuel-chip" [class.ev]="vehicle.fuelType === 'Electric'">
-            {{ vehicle.fuelType || 'Diesel' }}
-          </span>
+        <th mat-header-cell *matHeaderCellDef>Fuel Type</th>
+        <td mat-cell *matCellDef="let v">
+          <span class="fuel-pill" [class.ev-pill]="v.fuelType === 'Electric'">{{ v.fuelType }}</span>
         </td>
       </ng-container>
 
-      <!-- Driver -->
+      <!-- Driver Name -->
       <ng-container matColumnDef="driverName">
         <th mat-header-cell *matHeaderCellDef>Assigned Driver</th>
-        <td mat-cell *matCellDef="let vehicle">
-          {{ vehicle.driverName }}
-        </td>
+        <td mat-cell *matCellDef="let v">{{ v.driverName }}</td>
       </ng-container>
 
       <!-- Capacity -->
       <ng-container matColumnDef="capacity">
-        <th mat-header-cell *matHeaderCellDef>Payload Capacity</th>
-        <td mat-cell *matCellDef="let vehicle">
-          {{ vehicle.capacity }}
-        </td>
+        <th mat-header-cell *matHeaderCellDef>Capacity</th>
+        <td mat-cell *matCellDef="let v">{{ v.capacity }}</td>
       </ng-container>
 
       <!-- Odometer -->
       <ng-container matColumnDef="odometer">
         <th mat-header-cell *matHeaderCellDef>Odometer</th>
-        <td mat-cell *matCellDef="let vehicle">
-          {{ vehicle.currentOdometer ? (vehicle.currentOdometer | number) + ' km' : 'N/A' }}
-        </td>
+        <td mat-cell *matCellDef="let v"><b>{{ v.currentOdometer | number }} km</b></td>
       </ng-container>
 
       <!-- Status -->
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Status</th>
-        <td mat-cell *matCellDef="let vehicle">
-          <span
-            class="status-badge"
-            [ngClass]="{
-              'active': vehicle.status === 'Active',
-              'maintenance': vehicle.status === 'Maintenance',
-              'available': vehicle.status === 'Available'
-            }">
-            {{ vehicle.status }}
-          </span>
+        <td mat-cell *matCellDef="let v">
+          <span class="status-pill" [class]="v.status.toLowerCase()">{{ v.status }}</span>
         </td>
       </ng-container>
 
       <!-- Actions -->
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let vehicle" (click)="$event.stopPropagation()">
-          <button
-            mat-icon-button
-            color="primary"
-            title="View Details & Service History"
-            (click)="viewVehicleDetails(vehicle)">
-            <mat-icon>visibility</mat-icon>
-          </button>
-
-          <button
-            mat-icon-button
-            color="accent"
-            title="Edit Vehicle Specs"
-            (click)="editVehicle(vehicle)">
-            <mat-icon>edit</mat-icon>
-          </button>
-
-          <button
-            mat-icon-button
-            color="warn"
-            title="Delete Vehicle"
-            (click)="deleteVehicle(vehicle)">
-            <mat-icon>delete</mat-icon>
-          </button>
+        <td mat-cell *matCellDef="let v">
+          <div class="action-buttons">
+            <button mat-icon-button color="primary" (click)="viewVehicleDetails(v)" title="View Details">
+              <span class="material-icons">visibility</span>
+            </button>
+            <button mat-icon-button color="accent" (click)="editVehicle(v)" title="Edit">
+              <span class="material-icons">edit</span>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteVehicle(v)" title="Delete">
+              <span class="material-icons">delete_outline</span>
+            </button>
+          </div>
         </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row" (click)="viewVehicleDetails(row)"></tr>
-
-      <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell" colspan="9">
-          No vehicles matching "{{ input.value }}"
-        </td>
-      </tr>
-
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
-
   </div>
 
-  <!-- Slide-Out Vehicle Details Drawer & Maintenance History -->
+  <!-- SLIDE-OUT VEHICLE DETAILS DRAWER -->
   @if (isDetailsDrawerOpen && selectedVehicle) {
     <div class="drawer-overlay" (click)="closeDetailsDrawer()"></div>
-    <aside class="vehicle-details-drawer">
+    <div class="drawer-panel">
       <div class="drawer-header">
-        <div class="drawer-title-block">
-          <span class="material-icons drawer-icon">local_shipping</span>
-          <div>
-            <h3>{{ selectedVehicle.vehicleNumber }}</h3>
-            <p>{{ selectedVehicle.modelName }} · {{ selectedVehicle.type }}</p>
-          </div>
+        <div>
+          <h2>{{ selectedVehicle.vehicleNumber }}</h2>
+          <span class="model-sub">{{ selectedVehicle.modelName }}</span>
         </div>
         <button class="close-btn" (click)="closeDetailsDrawer()">
           <span class="material-icons">close</span>
@@ -219,75 +246,34 @@
       </div>
 
       <div class="drawer-body">
+        <div class="drawer-section">
+          <h3>Vehicle Specifications</h3>
+          <div class="info-row"><span class="lbl">Type:</span><span class="val">{{ selectedVehicle.type }}</span></div>
+          <div class="info-row"><span class="lbl">Fuel Type:</span><span class="val">{{ selectedVehicle.fuelType }}</span></div>
+          <div class="info-row"><span class="lbl">Capacity:</span><span class="val">{{ selectedVehicle.capacity }}</span></div>
+          <div class="info-row"><span class="lbl">Assigned Driver:</span><span class="val">{{ selectedVehicle.driverName }}</span></div>
+          <div class="info-row"><span class="lbl">Current Odometer:</span><span class="val">{{ selectedVehicle.currentOdometer | number }} km</span></div>
+          <div class="info-row"><span class="lbl">Last Service Date:</span><span class="val">{{ selectedVehicle.lastServiceDate }}</span></div>
+          <div class="info-row"><span class="lbl">Next Service Due:</span><span class="val">{{ selectedVehicle.nextServiceDue }}</span></div>
+        </div>
 
-        <!-- Vehicle Spec Sheet -->
-        <div class="spec-card">
-          <h4 class="card-subtitle"><span class="material-icons">directions_car</span> Technical Specs</h4>
-          <div class="spec-grid">
-            <div class="spec-item">
-              <span class="label">Status</span>
-              <span class="status-badge" [class]="selectedVehicle.status.toLowerCase()">{{ selectedVehicle.status }}</span>
-            </div>
-            <div class="spec-item">
-              <span class="label">Assigned Driver</span>
-              <span class="val">{{ selectedVehicle.driverName }}</span>
-            </div>
-            <div class="spec-item">
-              <span class="label">Fuel Type</span>
-              <span class="val">{{ selectedVehicle.fuelType || 'Diesel' }}</span>
-            </div>
-            <div class="spec-item">
-              <span class="label">Payload Capacity</span>
-              <span class="val">{{ selectedVehicle.capacity }}</span>
-            </div>
-            <div class="spec-item">
-              <span class="label">Odometer</span>
-              <span class="val">{{ selectedVehicle.currentOdometer | number }} km</span>
-            </div>
-            <div class="spec-item">
-              <span class="label">Next Service Due</span>
-              <span class="val highlight-val">{{ selectedVehicle.nextServiceDue }}</span>
-            </div>
+        <div class="drawer-section">
+          <h3>Maintenance History Timeline</h3>
+          <div class="maint-timeline">
+            @for (log of selectedVehicle.maintenanceLogs; track log.id) {
+              <div class="maint-log-item">
+                <div class="log-date">{{ log.date }}</div>
+                <div class="log-content">
+                  <h4>{{ log.type }}</h4>
+                  <p>{{ log.description }}</p>
+                  <span class="log-cost">Cost: ₹{{ log.cost | number }} · {{ log.mechanic }}</span>
+                </div>
+              </div>
+            }
           </div>
         </div>
-
-        <!-- Maintenance History Timeline -->
-        <div class="maintenance-card">
-          <h4 class="card-subtitle"><span class="material-icons">build</span> Maintenance &amp; Service History</h4>
-          
-          @if (!selectedVehicle.maintenanceLogs || selectedVehicle.maintenanceLogs.length === 0) {
-            <p class="empty-logs">No past service records logged for this vehicle.</p>
-          } @else {
-            <div class="history-timeline">
-              @for (log of selectedVehicle.maintenanceLogs; track log.id) {
-                <div class="timeline-item">
-                  <div class="timeline-dot" [class]="log.status.toLowerCase().replace(' ', '-')"></div>
-                  <div class="timeline-content">
-                    <div class="timeline-head">
-                      <h5>{{ log.type }}</h5>
-                      <span class="log-cost">₹{{ log.cost | number }}</span>
-                    </div>
-                    <p class="log-desc">{{ log.description }}</p>
-                    <div class="log-meta">
-                      <span><span class="material-icons">event</span> {{ log.date }}</span>
-                      <span><span class="material-icons">handyman</span> {{ log.mechanic }}</span>
-                      <span class="log-status-badge" [class]="log.status.toLowerCase().replace(' ', '-')">{{ log.status }}</span>
-                    </div>
-                  </div>
-                </div>
-              }
-            </div>
-          }
-        </div>
-
       </div>
-
-      <div class="drawer-footer">
-        <button mat-raised-button color="primary" (click)="editVehicle(selectedVehicle)">
-          <mat-icon>edit</mat-icon> Edit Vehicle Specs
-        </button>
-      </div>
-    </aside>
+    </div>
   }
 
 </div>

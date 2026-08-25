@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { BaseChartDirective } from 'ng2-charts';
 import { Chart, registerables, ChartConfiguration, ChartOptions } from 'chart.js';
-import { MAP_STYLES_DARK, MAP_STYLES_LIGHT } from '../../core/constants/maps.constants';
+import { MAP_STYLES_DARK } from '../../core/constants/maps.constants';
 
 Chart.register(...registerables);
 
@@ -44,13 +44,28 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     advisory: 'Optimal driving conditions'
   };
 
-  // KPI Cards
+  // Live Telemetry Anomaly Radar
+  telemetryRadar = [
+    { title: 'Route Deviation Alert', vehicle: 'OD-02-AB-1234', dev: '340m Off-Path', status: 'Active Warning', color: 'orange' },
+    { title: 'Cold Chain Temp Spike', vehicle: 'OD-05-CD-5678', dev: '+8.4°C (Limit: +4°C)', status: 'Temp Alert', color: 'red' },
+    { title: 'Harsh Braking Event', vehicle: 'OD-10-EF-9012', dev: '-4.2 g Deceleration', status: 'Logged', color: 'purple' }
+  ];
+
+  // Green Eco & Carbon Savings
+  ecoImpact = {
+    co2SavedTonnes: 84.6,
+    fuelSavedLiters: 34200,
+    greenFleetPct: 88,
+    treesEquivalent: 3850
+  };
+
+  // KPI Cards with Vibrant Neon Colors
   kpiCards = [
     {
       title: 'Total Vehicles',
       value: '120',
       icon: 'local_shipping',
-      color: 'blue',
+      color: 'blue-neon',
       trend: '+5% this month',
       trendUp: true
     },
@@ -58,7 +73,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       title: 'Active Trips',
       value: '38',
       icon: 'route',
-      color: 'green',
+      color: 'green-neon',
       trend: '+12% this week',
       trendUp: true
     },
@@ -66,7 +81,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       title: 'Total Drivers',
       value: '95',
       icon: 'people',
-      color: 'purple',
+      color: 'purple-neon',
       trend: '+2 new this week',
       trendUp: true
     },
@@ -74,7 +89,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       title: 'Fuel Cost Today',
       value: '₹14,280',
       icon: 'local_gas_station',
-      color: 'orange',
+      color: 'orange-neon',
       trend: '-3% vs yesterday',
       trendUp: false
     }
@@ -82,7 +97,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Fleet Status Breakdown
   fleetStatus = [
-    { label: 'Moving',      count: 42, color: '#22c55e', percent: 35 },
+    { label: 'Moving',      count: 42, color: '#10b981', percent: 35 },
     { label: 'Idle',        count: 28, color: '#f59e0b', percent: 23 },
     { label: 'Available',   count: 33, color: '#3b82f6', percent: 28 },
     { label: 'Maintenance', count: 17, color: '#ef4444', percent: 14 }
@@ -95,7 +110,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       {
         label: 'Trip Revenue (₹)',
         data: [185000, 210000, 195000, 240000, 230000, 265000],
-        backgroundColor: '#2563eb',
+        backgroundColor: '#3b82f6',
         borderRadius: 8,
         barPercentage: 0.6
       },
@@ -116,12 +131,12 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       legend: {
         display: true,
         position: 'top',
-        labels: { font: { family: 'Poppins' } }
+        labels: { color: '#94a3b8', font: { family: 'Poppins' } }
       }
     },
     scales: {
-      x: { grid: { display: false } },
-      y: { beginAtZero: true, ticks: { stepSize: 50000 } }
+      x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+      y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#94a3b8', stepSize: 50000 } }
     }
   };
 
@@ -175,7 +190,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     this.timeInterval = setInterval(() => {
       this.currentTime = new Date();
-    }, 60000);
+    }, 1000);
   }
 
   ngAfterViewInit(): void {
@@ -194,12 +209,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     const mapElement = document.getElementById('dashboardPreviewMap');
     if (!mapElement || typeof google === 'undefined') return;
 
-    const isDarkMode = document.body.classList.contains('dark-theme');
-
     this.previewMap = new google.maps.Map(mapElement, {
       center: { lat: 20.2961, lng: 85.8245 },
       zoom: 12,
-      styles: isDarkMode ? MAP_STYLES_DARK : MAP_STYLES_LIGHT,
+      styles: MAP_STYLES_DARK,
       disableDefaultUI: true,
       zoomControl: true
     });
@@ -217,7 +230,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         title: v.title,
         icon: {
           path: 'M 0,-10 L 6,10 L 0,6 L -6,10 Z',
-          fillColor: '#2563eb',
+          fillColor: '#3b82f6',
           fillOpacity: 1,
           strokeColor: '#ffffff',
           strokeWeight: 2,

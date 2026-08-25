@@ -11,6 +11,8 @@ export interface BreadcrumbItem {
   url: string;
 }
 
+declare var webkitSpeechRecognition: any;
+
 @Component({
   selector: 'app-header',
   standalone: true,
@@ -27,6 +29,10 @@ export class Header implements OnInit {
   title = 'Smart Fleet Management';
   isDarkMode = false;
   breadcrumbs: BreadcrumbItem[] = [];
+
+  isListening = false;
+  voiceTranscript = '';
+  voiceFeedback = '';
 
   private routeMap: Record<string, { title: string; crumbs: BreadcrumbItem[] }> = {
     '/dashboard':          { title: 'Dashboard',             crumbs: [{ label: 'Home', url: '/dashboard' }, { label: 'Dashboard', url: '/dashboard' }] },
@@ -61,6 +67,79 @@ export class Header implements OnInit {
       .subscribe((event: any) => {
         this.updateBreadcrumbs(event.urlAfterRedirects || event.url);
       });
+  }
+
+  // Voice AI Assistant Speech Listener
+  toggleVoiceControl(): void {
+    if (typeof webkitSpeechRecognition === 'undefined') {
+      this.simulateVoiceCommand();
+      return;
+    }
+
+    if (this.isListening) {
+      this.isListening = false;
+      return;
+    }
+
+    try {
+      const recognition = new webkitSpeechRecognition();
+      recognition.continuous = false;
+      recognition.lang = 'en-US';
+
+      this.isListening = true;
+      this.voiceFeedback = 'Listening... Say "Show Fleet", "Go to Fuel", or "Optimize Route"';
+
+      recognition.onresult = (event: any) => {
+        const text = event.results[0][0].transcript.toLowerCase();
+        this.voiceTranscript = text;
+        this.processVoiceCommand(text);
+        this.isListening = false;
+      };
+
+      recognition.onerror = () => {
+        this.simulateVoiceCommand();
+      };
+
+      recognition.start();
+    } catch (e) {
+      this.simulateVoiceCommand();
+    }
+  }
+
+  simulateVoiceCommand(): void {
+    this.isListening = true;
+    this.voiceFeedback = 'Simulating Voice AI: "Show Fleet Vehicles"';
+
+    setTimeout(() => {
+      this.isListening = false;
+      this.router.navigate(['/fleet']);
+      this.voiceFeedback = 'Navigated to Fleet Management!';
+      setTimeout(() => this.voiceFeedback = '', 3000);
+    }, 1500);
+  }
+
+  processVoiceCommand(cmd: string): void {
+    if (cmd.includes('fleet') || cmd.includes('vehicle')) {
+      this.router.navigate(['/fleet']);
+      this.voiceFeedback = 'Navigating to Fleet Management...';
+    } else if (cmd.includes('fuel') || cmd.includes('gas')) {
+      this.router.navigate(['/fuel']);
+      this.voiceFeedback = 'Navigating to Fuel Analytics...';
+    } else if (cmd.includes('route') || cmd.includes('optimize')) {
+      this.router.navigate(['/route-optimization']);
+      this.voiceFeedback = 'Opening AI Route Optimizer...';
+    } else if (cmd.includes('tracking') || cmd.includes('map')) {
+      this.router.navigate(['/tracking']);
+      this.voiceFeedback = 'Opening Live Tracking Map...';
+    } else if (cmd.includes('driver')) {
+      this.router.navigate(['/drivers']);
+      this.voiceFeedback = 'Navigating to Driver Roster...';
+    } else {
+      this.voiceFeedback = `Command "${cmd}" received. Navigating to Dashboard.`;
+      this.router.navigate(['/dashboard']);
+    }
+
+    setTimeout(() => this.voiceFeedback = '', 3500);
   }
 
   updateBreadcrumbs(url: string): void {

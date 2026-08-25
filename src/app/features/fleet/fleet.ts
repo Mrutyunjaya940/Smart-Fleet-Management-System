@@ -8,9 +8,27 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { Vehicle } from '../../models/vehicle.model';
 import { AddVehicle } from './add-vehicle/add-vehicle';
+
+interface MaintenanceAlert {
+  vehicleNumber: string;
+  model: string;
+  odometer: number;
+  thresholdKm: number;
+  serviceType: string;
+  urgency: 'Immediate' | 'Upcoming';
+}
+
+interface DocumentExpiryAlert {
+  vehicleNumber: string;
+  docName: 'Insurance' | 'PUC Certificate' | 'Fitness Pass' | 'Road Permit';
+  expiryDate: string;
+  daysRemaining: number;
+  status: 'Expired' | 'Expiring Soon' | 'Valid';
+}
 
 @Component({
   selector: 'app-fleet',
@@ -23,7 +41,8 @@ import { AddVehicle } from './add-vehicle/add-vehicle';
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    MatTabsModule
+    MatTabsModule,
+    MatProgressBarModule
   ],
   templateUrl: './fleet.html',
   styleUrls: ['./fleet.css']
@@ -46,6 +65,27 @@ export class Fleet implements OnInit {
   selectedVehicle: Vehicle | null = null;
   isDetailsDrawerOpen = false;
   activeFilter = 'All';
+
+  // Vehicle Document & Insurance Expiry Tracker
+  docExpiryAlerts: DocumentExpiryAlert[] = [
+    { vehicleNumber: 'OD-05-CD-5678', docName: 'Insurance', expiryDate: '30 Aug 2026', daysRemaining: 6, status: 'Expiring Soon' },
+    { vehicleNumber: 'OD-02-AB-1234', docName: 'PUC Certificate', expiryDate: '15 Aug 2026', daysRemaining: -9, status: 'Expired' },
+    { vehicleNumber: 'OD-14-GH-3456', docName: 'Fitness Pass', expiryDate: '12 Dec 2026', daysRemaining: 110, status: 'Valid' }
+  ];
+
+  // Predictive Maintenance Alerts (@ 10,000 km threshold)
+  predictiveAlerts: MaintenanceAlert[] = [
+    { vehicleNumber: 'OD-05-CD-5678', model: 'Mahindra Bolero', odometer: 68100, thresholdKm: 70000, serviceType: '70,000 km Gearbox & Fluid Service', urgency: 'Immediate' },
+    { vehicleNumber: 'OD-02-AB-1234', model: 'Tata Signa 2823.K', odometer: 45200, thresholdKm: 50000, serviceType: '50,000 km Oil & Brake Service', urgency: 'Upcoming' }
+  ];
+
+  // Repair Cost Breakdown Per Model
+  modelCostBreakdown = [
+    { model: 'Mahindra Bolero Pickup', totalCost: 14500, repairCount: 1, status: 'High Cost' },
+    { model: 'Tata Signa 2823.K', totalCost: 12700, repairCount: 2, status: 'Normal' },
+    { model: 'Ashok Leyland Ecomet', totalCost: 3500, repairCount: 1, status: 'Low Cost' },
+    { model: 'Tata Ace EV', totalCost: 1800, repairCount: 1, status: 'Optimal EV' }
+  ];
 
   mockVehicles: Vehicle[] = [
     {
@@ -206,7 +246,6 @@ export class Fleet implements OnInit {
     }
   }
 
-  // Dynamic KPI computed getters
   get totalVehiclesCount(): number {
     return this.mockVehicles.length;
   }

@@ -1,19 +1,12 @@
-.footer{
-
-  height:50px;
-
-  background:#ffffff;
-
-  display:flex;
-
-  justify-content:center;
-
-  align-items:center;
-
-  border-top:1px solid #e5e7eb;
-
-  color:#64748b;
-
-  font-size:14px;
-
+.footer {
+  height: 50px;
+  background: rgba(17, 24, 39, 0.95);
+  backdrop-filter: blur(16px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  font-size: 13px;
+  font-family: 'Poppins', sans-serif;
 }

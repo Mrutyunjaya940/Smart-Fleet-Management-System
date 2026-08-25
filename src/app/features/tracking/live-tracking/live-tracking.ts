@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
+import { MatCardModule } from '@angular/material/card';
 import { VehicleLocation } from '../../../models/location.model';
 import { MAP_STYLES_DARK, MAP_STYLES_LIGHT } from '../../../core/constants/maps.constants';
 
@@ -27,7 +28,8 @@ export interface PlaybackWaypoint {
     MatButtonModule,
     MatIconModule,
     MatSelectModule,
-    MatSliderModule
+    MatSliderModule,
+    MatCardModule
   ],
   templateUrl: './live-tracking.html',
   styleUrls: ['./live-tracking.css']
@@ -38,9 +40,44 @@ export class LiveTracking implements AfterViewInit, OnDestroy {
 
   map!: any;
   markers: any[] = [];
+  evMarkers: any[] = [];
   infoWindow!: any;
   simulationInterval: any;
   selectedVehicle: VehicleLocation | null = null;
+  routeDeviationToast: string | null = null;
+
+  // Cold Chain Cargo IoT Telemetry
+  coldChainCargo = {
+    vehicle: 'OD-02-AB-1234 (Refrigerated Truck)',
+    cargoType: 'Pharmaceutical Vaccines & Dairy',
+    temperature: -4.2, // °C
+    targetRange: '-20°C to +4°C',
+    humidity: '65%',
+    doorStatus: 'Locked (Closed)',
+    tempAlert: null as string | null
+  };
+
+  // EV Battery degradation & Fast Charging Station Pins
+  evFleetStatus = {
+    vehicle: 'OD-10-EF-9012 (Tata Ace EV)',
+    soc: 82, // %
+    batteryHealth: 98, // %
+    estRangeKm: 184,
+    chargersNearby: [
+      { name: 'Tata Power EZ Charge (Master Canteen)', lat: 20.2648, lng: 85.8417, availablePlugs: 4, type: '60 kW CCS2' },
+      { name: 'Jio-bp pulse (Jaydev Vihar)', lat: 20.3010, lng: 85.8240, availablePlugs: 2, type: '50 kW DC Fast' },
+      { name: 'Ather Grid (KIIT Square)', lat: 20.3556, lng: 85.8188, availablePlugs: 3, type: '25 kW Fast' }
+    ]
+  };
+
+  // FASTag Toll Calculator Widget
+  fastagToll = {
+    walletBalance: 4250,
+    upcomingTolls: [
+      { plaza: 'NH-16 Rasulgarh Toll Plaza', cost: 185, distance: '12 km ahead' },
+      { plaza: 'Puri Highway Pipili Toll', cost: 120, distance: '34 km ahead' }
+    ]
+  };
 
   // Real-Time Vehicles Data
   vehicles: VehicleLocation[] = [
@@ -85,13 +122,12 @@ export class LiveTracking implements AfterViewInit, OnDestroy {
   // Route Playback State
   selectedPlaybackVehicle = 'OD-02-AB-1234';
   isPlaying = false;
-  playbackSpeed = 1; // 1x, 2x, 4x
+  playbackSpeed = 1;
   playbackIndex = 0;
   playbackInterval: any;
   playbackPolyline?: any;
   playbackMarker?: any;
 
-  // Mock Playback Route History (Bhubaneswar → Cuttack Highway)
   playbackWaypoints: PlaybackWaypoint[] = [
     { lat: 20.2648, lng: 85.8417, time: '09:00 AM', speed: 0,  locationName: 'Master Canteen Station' },
     { lat: 20.2882, lng: 85.8436, time: '09:08 AM', speed: 45, locationName: 'Saheed Nagar' },
@@ -146,6 +182,56 @@ export class LiveTracking implements AfterViewInit, OnDestroy {
 
     this.infoWindow = new google.maps.InfoWindow();
     this.addMarkers();
+    this.addEvChargerMarkers();
+  }
+
+  addEvChargerMarkers(): void {
+    if (!this.map) return;
+
+    this.evFleetStatus.chargersNearby.forEach(ch => {
+      const marker = new google.maps.Marker({
+        position: { lat: ch.lat, lng: ch.lng },
+        map: this.map,
+        title: `EV Fast Charger: ${ch.name}`,
+        icon: {
+          path: 'M 0,-10 L 8,10 L -8,10 Z',
+          fillColor: '#8b5cf6',
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 2,
+          scale: 1.3
+        }
+      });
+
+      marker.addListener('click', () => {
+        this.infoWindow.setContent(`
+          <div style="padding:8px; font-family:'Poppins',sans-serif; color:#0f172a;">
+            <h4 style="margin:0 0 4px; font-weight:700; color:#8b5cf6;">⚡ ${ch.name}</h4>
+            <p style="margin:0 0 2px; font-size:0.8rem;">Type: <b>${ch.type}</b></p>
+            <span style="font-size:0.75rem; color:#10b981; font-weight:700;">${ch.availablePlugs} Plugs Available Now</span>
+          </div>
+        `);
+        this.infoWindow.open(this.map, marker);
+      });
+
+      this.evMarkers.push(marker);
+    });
+  }
+
+  simulateColdChainBreach(): void {
+    this.coldChainCargo.temperature = 8.4;
+    this.coldChainCargo.tempAlert = '⚠️ CRITICAL: Cargo Temp (+8.4°C) Exceeded Safe Range (-20°C to +4°C)!';
+    setTimeout(() => {
+      this.coldChainCargo.temperature = -4.2;
+      this.coldChainCargo.tempAlert = null;
+    }, 6000);
+  }
+
+  simulateRouteDeviationPing(): void {
+    this.routeDeviationToast = '🚨 KAFKA ALERT (route-deviation-detected): Vehicle OD-02-AB-1234 deviated 340m off-path!';
+    setTimeout(() => {
+      this.routeDeviationToast = null;
+    }, 6500);
   }
 
   addMarkers(): void {
@@ -232,7 +318,6 @@ export class LiveTracking implements AfterViewInit, OnDestroy {
     }, 3000);
   }
 
-  // ---- ROUTE PLAYBACK LOGIC ----
   setupPlaybackMode(): void {
     this.markers.forEach(m => m.setMap(null));
     this.markers = [];
@@ -241,7 +326,6 @@ export class LiveTracking implements AfterViewInit, OnDestroy {
 
     const path = this.playbackWaypoints.map(w => ({ lat: w.lat, lng: w.lng }));
 
-    // Draw route trail
     this.playbackPolyline = new google.maps.Polyline({
       path: path,
       geodesic: true,
@@ -251,7 +335,6 @@ export class LiveTracking implements AfterViewInit, OnDestroy {
       map: this.map
     });
 
-    // Create playback vehicle marker
     const firstPoint = path[0];
     this.playbackMarker = new google.maps.Marker({
       position: firstPoint,

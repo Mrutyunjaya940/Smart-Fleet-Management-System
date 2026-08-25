@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { Login } from './features/authentication/login/login';
+import { Register } from './features/authentication/register/register';
 import { ForgotPassword } from './features/authentication/forgot-password/forgot-password';
 import { OtpVerification } from './features/authentication/otp-verification/otp-verification';
 import { ResetPassword } from './features/authentication/reset-password/reset-password';
@@ -17,6 +18,7 @@ import { FuelManagement } from './features/fuel/fuel-management/fuel-management'
 import { RouteOptimization } from './features/route-optimization/route-optimization';
 import { Reports } from './features/reports/reports';
 import { Settings } from './features/settings/settings';
+import { DriverPortal } from './features/driver-portal/driver-portal';
 
 export const routes: Routes = [
 
@@ -33,6 +35,10 @@ export const routes: Routes = [
     component: Login
   },
   {
+    path: 'register',
+    component: Register
+  },
+  {
     path: 'forgot-password',
     component: ForgotPassword
   },
@@ -43,6 +49,12 @@ export const routes: Routes = [
   {
     path: 'reset-password',
     component: ResetPassword
+  },
+
+  // Dedicated Driver Mobile Portal
+  {
+    path: 'driver-portal',
+    component: DriverPortal
   },
 
   // Protected routes (require auth)
@@ -61,18 +73,17 @@ export const routes: Routes = [
       { path: 'fuel',               component: FuelManagement },
       { path: 'route-optimization', component: RouteOptimization },
       { path: 'reports',            component: Reports },
-      { path: 'settings',           component: Settings }
+      { path: 'settings',           component: Settings },
+      { path: 'driver-portal',      component: DriverPortal }
     ]
   },
 
-  // Top-level shortcut aliases so existing sidebar links (/dashboard, /fleet etc.) still work
+  // Top-level shortcut aliases
   {
     path: 'dashboard',
     component: DashboardLayout,
     canActivate: [authGuard],
-    children: [
-      { path: '', component: DashboardComponent }
-    ]
+    children: [{ path: '', component: DashboardComponent }]
   },
   {
     path: 'fleet',
